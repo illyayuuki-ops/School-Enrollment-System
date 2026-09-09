@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/auth.php';
 
 if (!empty($_SESSION['user'])) {
@@ -9,34 +8,21 @@ if (!empty($_SESSION['user'])) {
     exit;
 }
 
-$error = null;
-$selectedRole = $_POST['role'] ?? 'student';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim((string) ($_POST['email'] ?? ''));
-    $password = (string) ($_POST['password'] ?? '');
-    $allowedRoles = ['admin', 'admission', 'registrar', 'teacher', 'student'];
-
-    if (!in_array($selectedRole, $allowedRoles, true) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Enter a valid email and role.';
-    } else {
-        $statement = db_connect()->prepare(
-            'SELECT id, email, full_name, password_hash, role, status FROM users WHERE email = :email AND role = :role LIMIT 1'
-        );
-        $statement->execute(['email' => $email, 'role' => $selectedRole]);
-        $user = $statement->fetch();
-
-        if (!$user || $user['status'] !== 'active' || !password_verify($password, $user['password_hash'])) {
-            $error = 'Those credentials could not be verified.';
-        } else {
-            session_regenerate_id(true);
-            unset($user['password_hash']);
-            $_SESSION['user'] = $user;
-            header('Location: /dashboard.php');
-            exit;
-        }
-    }
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
+$error = $_SESSION['login_error'] ?? null;
+unset($_SESSION['login_error']);
+$selectedRole = $_SESSION['login_role'] ?? 'admission';
+unset($_SESSION['login_role']);
+$roles = [
+    'admission' => ['Admissions', 'Review new applications'],
+    'registrar' => ['Registrar', 'Maintain student records'],
+    'teacher' => ['Faculty', 'Manage classes and rosters'],
+    'student' => ['Student', 'View your enrollment'],
+    'admin' => ['Administrator', 'Configure the workspace'],
+];
 ?>
 <!doctype html>
 <html lang="en">
@@ -45,37 +31,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sign in · Northstar Enrollment</title>
     <link rel="stylesheet" href="/assets/app.css">
+    <link rel="stylesheet" href="/assets/login.css">
 </head>
 <body class="login-page">
     <main class="login-layout">
         <section class="login-story">
-            <div class="story-brand"><span class="brand-mark">N</span><strong>Northstar</strong></div>
+            <div class="story-brand"><span class="brand-mark">N</span><strong>Northstar Enrollment Operations</strong></div>
             <div>
-                <span class="eyebrow">Enrollment operations</span>
-                <h1>Move every learner<br><em>forward.</em></h1>
-                <p>A calm, connected workspace for the people who make a school year happen.</p>
+                <span class="eyebrow">The clear path forward</span>
+                <h1>From first inquiry<br><em>to fully enrolled.</em></h1>
+                <p>A focused operations workspace for the people who keep a school moving.</p>
             </div>
-            <span class="story-note">Built for better starts · A.Y. 2026–2027</span>
+            <span class="story-note">Academic year 2026–2027</span>
         </section>
         <section class="login-panel">
             <div class="auth-card">
-                <span class="eyebrow">Secure portal</span>
-                <h2>Welcome back</h2>
-                <p class="muted">Sign in to continue to your enrollment workspace.</p>
-                <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
-                <form method="post" novalidate>
-                    <label>Email address<input type="email" name="email" autocomplete="username" placeholder="you@northstar.edu" required></label>
-                    <label>Password<input type="password" name="password" autocomplete="current-password" placeholder="Enter your password" required></label>
-                    <label>Workspace role<select name="role">
-                        <?php foreach (['student', 'admission', 'registrar', 'teacher', 'admin'] as $role): ?>
-                            <option value="<?= $role ?>" <?= $selectedRole === $role ? 'selected' : '' ?>><?= ucfirst($role) ?></option>
+                <span class="eyebrow">Secure workspace</span>
+                <h2>Sign in to your workspace</h2>
+                <p class="muted">Select your team context to continue.</p>
+                <?php if ($error): ?>
+                    <div class="alert alert-error" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+                <?php endif; ?>
+                <form method="post" action="/process_login.php" novalidate>
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="user_role" id="selected_role" value="<?= htmlspecialchars($selectedRole, ENT_QUOTES, 'UTF-8') ?>">
+                    <fieldset class="role-grid">
+                        <legend class="sr-only">Choose your team context</legend>
+                        <?php foreach ($roles as $value => [$label, $description]): ?>
+                            <button type="button" class="role-card <?= $selectedRole === $value ? 'active' : '' ?>" data-role="<?= $value ?>">
+                                <span class="role-radio" aria-hidden="true"></span>
+                                <span><strong><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></strong><small><?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8') ?></small></span>
+                            </button>
                         <?php endforeach; ?>
-                    </select></label>
-                    <button class="button button-primary" type="submit">Sign in <span aria-hidden="true">↗</span></button>
+                    </fieldset>
+                    <label>Work email / User ID
+                        <input type="email" name="email" autocomplete="username" placeholder="you@northstar.edu" required>
+                    </label>
+                    <label>Password
+                        <span class="password-field">
+                            <input id="password" type="password" name="password" autocomplete="current-password" placeholder="Enter your password" required>
+                            <button type="button" class="password-toggle" data-toggle-password aria-label="Show password">Show</button>
+                        </span>
+                    </label>
+                    <div class="form-actions">
+                        <button type="button" class="text-button" data-open-forgot>Forgot password?</button>
+                        <button class="button button-primary" type="submit">Continue to Northstar <span aria-hidden="true">→</span></button>
+                    </div>
                 </form>
-                <p class="auth-help">Having trouble? <a href="mailto:registrar@northstar.edu">Contact support</a></p>
+                <p class="auth-help">Your session is protected with school-grade access controls.</p>
             </div>
         </section>
     </main>
+    <div class="modal-backdrop" data-forgot-modal hidden>
+        <section class="recovery-modal" role="dialog" aria-modal="true" aria-labelledby="recovery-title">
+            <button type="button" class="modal-close" data-close-forgot aria-label="Close">×</button>
+            <span class="eyebrow">Credential recovery</span>
+            <h2 id="recovery-title">Need help signing in?</h2>
+            <p class="muted">Contact the registrar's office with your school email and selected workspace role. They can verify your identity and reset your access.</p>
+            <a class="button button-primary" href="mailto:registrar@northstar.edu">Email registrar's office</a>
+        </section>
+    </div>
+    <script>
+        (() => {
+            const selectedRole = document.getElementById('selected_role');
+            const roleCards = document.querySelectorAll('[data-role]');
+            roleCards.forEach((card) => card.addEventListener('click', () => {
+                roleCards.forEach((item) => item.classList.remove('active'));
+                card.classList.add('active');
+                selectedRole.value = card.dataset.role;
+            }));
+
+            const password = document.getElementById('password');
+            const passwordToggle = document.querySelector('[data-toggle-password]');
+            passwordToggle.addEventListener('click', () => {
+                const visible = password.type === 'text';
+                password.type = visible ? 'password' : 'text';
+                passwordToggle.textContent = visible ? 'Show' : 'Hide';
+                passwordToggle.setAttribute('aria-label', visible ? 'Show password' : 'Hide password');
+            });
+
+            const modal = document.querySelector('[data-forgot-modal]');
+            document.querySelector('[data-open-forgot]').addEventListener('click', () => { modal.hidden = false; });
+            document.querySelector('[data-close-forgot]').addEventListener('click', () => { modal.hidden = true; });
+            modal.addEventListener('click', (event) => { if (event.target === modal) modal.hidden = true; });
+        })();
+    </script>
 </body>
 </html>

@@ -19,6 +19,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -40,7 +41,7 @@ export default function Login() {
             <div className="proof-item"><span className="proof-number">02</span><span>Context that follows the student forward.</span></div>
           </div>
           <div className="login-geometry" aria-hidden="true"><span /><span /><span /></div>
-          <div className="story-footer"><span>Academic year 2025–26</span><span>Secure workspace</span></div>
+           <div className="story-footer"><span>Academic year 2026–2027</span><span>Secure workspace</span></div>
         </div>
       </section>
       <section className="login-panel">
@@ -53,9 +54,10 @@ export default function Login() {
             </button>)}
           </div>
           <form onSubmit={submit} className="login-form">
+            <input type="hidden" name="user_role" value={role} />
             <label className="field-label" htmlFor="email">Work email</label>
             <div className="field-with-icon"><Mail size={16} /><input id="email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@school.edu" data-testid="input-email" /></div>
-            <div className="field-row"><label className="field-label" htmlFor="password">Password</label><button type="button" className="text-button" data-testid="button-forgot-password">Forgot password?</button></div>
+            <div className="field-row"><label className="field-label" htmlFor="password">Password</label><button type="button" className="text-button" onClick={() => setForgotOpen(true)} data-testid="button-forgot-password">Forgot password?</button></div>
             <div className="field-with-icon"><LockKeyhole size={16} /><input id="password" type={showPassword ? 'text' : 'password'} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter your password" data-testid="input-password" /><button type="button" className="password-toggle" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'} data-testid="button-toggle-password">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button></div>
             {login.isError && <div className="form-error" role="alert" data-testid="status-login-error">We couldn't sign you in. Check your details and try again.</div>}
             <button className="primary-button login-submit" type="submit" disabled={login.isPending} data-testid="button-submit-login"><span>{login.isPending ? 'Signing in…' : 'Continue to Northstar'}</span><ArrowRight size={17} /></button>
@@ -64,6 +66,15 @@ export default function Login() {
           <p className="login-legal">By continuing, you agree to your institution’s acceptable use policy.</p>
         </div>
       </section>
+      {forgotOpen && <div className="modal-backdrop" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setForgotOpen(false); }}>
+        <section className="recovery-modal" role="dialog" aria-modal="true" aria-labelledby="recovery-title">
+          <button type="button" className="modal-close" onClick={() => setForgotOpen(false)} aria-label="Close recovery dialog">×</button>
+          <div className="eyebrow">Credential recovery</div>
+          <h2 id="recovery-title">Need help signing in?</h2>
+          <p>Contact the registrar&apos;s office with your school email and selected workspace role. They can verify your identity and reset your access.</p>
+          <a className="primary-button recovery-link" href="mailto:registrar@northstar.edu">Email registrar&apos;s office</a>
+        </section>
+      </div>}
     </div>
   );
 }

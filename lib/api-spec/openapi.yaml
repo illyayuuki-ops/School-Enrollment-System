@@ -10,6 +10,14 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication and session operations
+  - name: dashboard
+    description: Role-aware dashboard summaries
+  - name: enrollment
+    description: Applicant verification queue operations
+  - name: students
+    description: Student masterlist operations
 paths:
   /healthz:
     get:
@@ -24,6 +32,119 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Sign in to the enrollment portal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Authenticated session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionUser"
+        "401":
+          description: Invalid credentials
+  /auth/session:
+    get:
+      operationId: getSession
+      tags: [auth]
+      summary: Get the current session
+      responses:
+        "200":
+          description: Current authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionUser"
+        "401":
+          description: No active session
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: End the current session
+      responses:
+        "204":
+          description: Session ended
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard metrics for the active role
+      responses:
+        "200":
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /enrollment/queue:
+    get:
+      operationId: listEnrollmentQueue
+      tags: [enrollment]
+      summary: List applicants awaiting review
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [all, pending, verified, enrolled]
+            default: all
+      responses:
+        "200":
+          description: Enrollment queue
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EnrollmentApplicant"
+  /enrollment/queue/{id}/review:
+    post:
+      operationId: reviewEnrollment
+      tags: [enrollment]
+      summary: Verify or return an applicant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewEnrollmentInput"
+      responses:
+        "200":
+          description: Updated applicant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnrollmentApplicant"
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: List enrolled students
+      responses:
+        "200":
+          description: Student masterlist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +154,93 @@ components:
           type: string
       required:
         - status
+    LoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        role:
+          type: string
+          enum: [admin, admission, registrar, teacher, student]
+      required: [email, password, role]
+    SessionUser:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string, format: email }
+        fullName: { type: string }
+        role:
+          type: string
+          enum: [admin, admission, registrar, teacher, student]
+        status: { type: string }
+      required: [id, email, fullName, role, status]
+    DashboardSummary:
+      type: object
+      properties:
+        activeAcademicYear: { type: string }
+        totalApplicants: { type: integer }
+        pendingReview: { type: integer }
+        enrolledStudents: { type: integer }
+        activeClasses: { type: integer }
+        completionRate: { type: number }
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+      required:
+        [activeAcademicYear, totalApplicants, pendingReview, enrolledStudents, activeClasses, completionRate, recentActivity]
+    ActivityItem:
+      type: object
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        detail: { type: string }
+        timestamp: { type: string }
+        tone:
+          type: string
+          enum: [blue, green, amber, slate]
+      required: [id, label, detail, timestamp, tone]
+    EnrollmentApplicant:
+      type: object
+      properties:
+        id: { type: integer }
+        studentNumber: { type: string }
+        fullName: { type: string }
+        email: { type: string, format: email }
+        program: { type: string }
+        submittedAt: { type: string }
+        documentCount: { type: integer }
+        status:
+          type: string
+          enum: [pending, verified, enrolled]
+        remarks:
+          type: ["string", "null"]
+      required: [id, studentNumber, fullName, email, program, submittedAt, documentCount, status, remarks]
+    ReviewEnrollmentInput:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum: [verified, pending]
+        remarks:
+          type: string
+          maxLength: 500
+      required: [decision]
+    Student:
+      type: object
+      properties:
+        id: { type: integer }
+        studentNumber: { type: string }
+        fullName: { type: string }
+        program: { type: string }
+        yearLevel: { type: string }
+        load: { type: string }
+        status:
+          type: string
+          enum: [active, probation, pending]
+      required: [id, studentNumber, fullName, program, yearLevel, load, status]
 

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "School Enrollment System"
+description = "A secure school enrollment operations portal for admissions, registrars, teachers, students, and administrators, with role-aware dashboards and PostgreSQL-backed workflows."
+version = "1.0.0"
+id = "artifacts/school-enrollment"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22034
+
+[services.development]
+run = "pnpm --filter @workspace/school-enrollment run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/school-enrollment", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/school-enrollment/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22034"
+BASE_PATH = "/"

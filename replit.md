@@ -1,6 +1,6 @@
-# [Project name]
+# Northstar School Enrollment System
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Northstar is a role-aware school enrollment operations portal for admissions, registrars, faculty, students, and administrators.
 
 ## Run & Operate
 
@@ -22,15 +22,27 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/school-enrollment` — responsive enrollment portal UI and role-specific views.
+- `artifacts/api-server/src/routes/enrollment.ts` — authentication, dashboard, applicant queue, and student endpoints.
+- `lib/api-spec/openapi.yaml` — API contract source of truth.
+- `lib/db/src/schema/index.ts` — Drizzle schema for users, students, enrollment queue, and class schedules.
+- `database/schema.sql` — portable PostgreSQL schema reference.
+- `php/` — native PHP connection, session auth, reusable layout fragments, and dashboard reference implementation.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The API contract is generated from OpenAPI so the dashboard and server share the same response shapes.
+- Role-aware navigation is centralized in the portal shell so each user sees only the workflows relevant to their role.
+- The enrollment queue uses query-key invalidation after a review decision so the visible list stays in sync.
+- Native PHP layout and authentication fragments are kept separately under `php/` for deployments that run the requested PHP application directly.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Split-screen role-aware login experience.
+- Overview dashboard with academic-year context, enrollment metrics, activity feed, and action center.
+- Admission verification queue with status filters, search, document counts, and review decisions.
+- Registrar masterlist with search and status filtering.
+- Teacher, student, and administrator role-specific dashboard surfaces.
 
 ## User preferences
 

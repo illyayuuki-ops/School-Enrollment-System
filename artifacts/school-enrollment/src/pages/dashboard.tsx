@@ -1,0 +1,28 @@
+import { ArrowUpRight, CheckCircle2, Clock3, FileText, GraduationCap, MoreHorizontal, UsersRound } from 'lucide-react';
+import { Link } from 'wouter';
+import { getGetDashboardSummaryQueryKey, useGetDashboardSummary } from '@workspace/api-client-react';
+
+function Skeleton({ className = '' }: { className?: string }) { return <div className={`skeleton ${className}`} />; }
+
+export default function Dashboard() {
+  const summary = useGetDashboardSummary({ query: { retry: 1, queryKey: getGetDashboardSummaryQueryKey() } });
+  const data = summary.data;
+  const metrics = data ? [
+    { label: 'Total applicants', value: data.totalApplicants, note: 'This academic year', icon: FileText, accent: 'gold' },
+    { label: 'Pending review', value: data.pendingReview, note: 'Needs your attention', icon: Clock3, accent: 'coral', link: '/admission/queue' },
+    { label: 'Enrolled students', value: data.enrolledStudents, note: 'Verified and active', icon: UsersRound, accent: 'teal', link: '/registrar/students' },
+    { label: 'Active classes', value: data.activeClasses, note: 'Running this term', icon: GraduationCap, accent: 'navy', link: '/teacher/classes' },
+  ] : [];
+  return <div className="content-frame">
+    <div className="page-intro"><div><div className="eyebrow">Operations overview</div><h1>Good morning, team.</h1><p className="page-subtitle">Here’s the pulse of your enrollment workspace.</p></div><div className="year-chip"><span className="live-dot" /> Active academic year <strong>{data?.activeAcademicYear || '2025–26'}</strong></div></div>
+    {summary.isError && <div className="inline-alert" role="alert" data-testid="status-dashboard-error"><strong>Overview unavailable.</strong> We couldn't load the latest metrics. <button onClick={() => summary.refetch()} data-testid="button-retry-dashboard">Try again</button></div>}
+    <section className="metric-grid" aria-label="Enrollment metrics">
+      {summary.isLoading ? [1, 2, 3, 4].map((item) => <div className="metric-card" key={item}><Skeleton className="skeleton-icon" /><Skeleton className="skeleton-line wide" /><Skeleton className="skeleton-number" /></div>) : metrics.map((metric) => { const Icon = metric.icon; return <Link href={metric.link || '/dashboard'} className="metric-card" key={metric.label} data-testid={`card-metric-${metric.label.toLowerCase().replaceAll(' ', '-')}`}><div className={`metric-icon ${metric.accent}`}><Icon size={18} /></div><div className="metric-label">{metric.label}<ArrowUpRight size={14} /></div><div className="metric-value">{metric.value.toLocaleString()}</div><div className="metric-note">{metric.note}</div></Link>; })}
+    </section>
+    <div className="dashboard-grid">
+      <section className="surface-card progress-card"><div className="card-heading"><div><div className="eyebrow">Throughput</div><h2>Enrollment completion</h2></div><button className="icon-button" data-testid="button-progress-menu" aria-label="More completion options"><MoreHorizontal size={18} /></button></div><div className="progress-main"><div className="progress-ring" style={{ '--progress': `${data?.completionRate || 0}%` } as React.CSSProperties}><div><strong>{data?.completionRate || 0}%</strong><span>complete</span></div></div><div className="progress-copy"><p>Applicants are moving through the pipeline at a steady pace.</p><div className="progress-legend"><span><i className="legend-dot verified" /> Verified</span><span><i className="legend-dot remaining" /> In progress</span></div></div></div><div className="pipeline"><div className="pipeline-labels"><span>Application</span><span>Verification</span><span>Enrollment</span></div><div className="pipeline-track"><span style={{ width: `${Math.min(data?.completionRate || 0, 100)}%` }} /></div></div></section>
+      <section className="surface-card activity-card"><div className="card-heading"><div><div className="eyebrow">Live log</div><h2>Recent activity</h2></div><button className="text-button" data-testid="button-view-all-activity">View all</button></div>{summary.isLoading ? <div className="activity-list">{[1, 2, 3].map((item) => <div className="activity-item" key={item}><Skeleton className="activity-marker" /><div><Skeleton className="skeleton-line wide" /><Skeleton className="skeleton-line short" /></div></div>)}</div> : data?.recentActivity?.length ? <div className="activity-list">{data.recentActivity.slice(0, 5).map((item) => <div className="activity-item" key={item.id} data-testid={`activity-item-${item.id}`}><span className={`activity-marker ${item.tone}`} /><div className="activity-copy"><strong>{item.label}</strong><span>{item.detail}</span></div><time>{item.timestamp}</time></div>)}</div> : <div className="empty-state compact"><CheckCircle2 size={22} /><p>No recent activity yet.</p></div>}</section>
+    </div>
+    <section className="quick-actions"><div><div className="eyebrow">Shortcuts</div><h2>Move work forward</h2></div><div className="action-links"><Link href="/admission/queue" className="action-link" data-testid="link-action-review"><span className="action-link-icon"><CheckCircle2 size={17} /></span><span><strong>Review applications</strong><small>Clear the verification queue</small></span><ArrowUpRight size={15} /></Link><Link href="/registrar/students" className="action-link" data-testid="link-action-students"><span className="action-link-icon"><UsersRound size={17} /></span><span><strong>Find a student</strong><small>Search the masterlist</small></span><ArrowUpRight size={15} /></Link></div></section>
+  </div>;
+}

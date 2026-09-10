@@ -10,7 +10,7 @@ session_start([
 function require_auth(): void
 {
     if (empty($_SESSION['user'])) {
-        header('Location: /login.php');
+        header('Location: /login/student.php');
         exit;
     }
 }

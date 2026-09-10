@@ -4,28 +4,38 @@ declare(strict_types=1);
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/auth.php';
 
+$backUrl = '/login/student.php';
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /login.php');
+    header('Location: ' . $backUrl);
     exit;
 }
 
 $csrfToken = (string) ($_POST['csrf_token'] ?? '');
 if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
     $_SESSION['login_error'] = 'Your login form expired. Please try again.';
-    header('Location: /login.php');
+    header('Location: ' . $backUrl);
     exit;
 }
 
 $email = trim((string) ($_POST['email'] ?? ''));
 $password = (string) ($_POST['password'] ?? '');
 $role = (string) ($_POST['user_role'] ?? '');
+$roleLabels = [
+    'student' => 'Student',
+    'admin' => 'Administrator',
+    'teacher' => 'Faculty',
+    'registrar' => 'Registrar',
+    'admission' => 'Admissions',
+];
+$backUrl = isset($roleLabels[$role]) ? "/login/$role.php" : '/login/student.php';
 $allowedRoles = ['admin', 'admission', 'registrar', 'teacher', 'student'];
 
 $_SESSION['login_role'] = $role;
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '' || !in_array($role, $allowedRoles, true)) {
     $_SESSION['login_error'] = 'Enter a valid email, password, and workspace role.';
-    header('Location: /login.php');
+    header('Location: ' . $backUrl);
     exit;
 }
 
@@ -39,8 +49,8 @@ $statement->execute(['email' => $email, 'role' => $role]);
 $user = $statement->fetch();
 
 if (!$user || $user['status'] !== 'active' || !password_verify($password, $user['password_hash'])) {
-    $_SESSION['login_error'] = 'Those credentials could not be verified for the selected workspace role.';
-    header('Location: /login.php');
+    $_SESSION['login_error'] = "This account is not a {$roleLabels[$role]} account.";
+    header('Location: ' . $backUrl);
     exit;
 }
 

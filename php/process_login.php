@@ -4,7 +4,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/auth.php';
 
-$backUrl = '/login/student.php';
+$allowedRoles = ['admin', 'admission', 'registrar', 'teacher', 'student'];
+$role = (string) ($_POST['user_role'] ?? '');
+$backUrl = in_array($role, $allowedRoles, true) ? "/login/$role.php" : '/login/student.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ' . $backUrl);
@@ -20,7 +22,6 @@ if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csr
 
 $email = trim((string) ($_POST['email'] ?? ''));
 $password = (string) ($_POST['password'] ?? '');
-$role = (string) ($_POST['user_role'] ?? '');
 $roleLabels = [
     'student' => 'Student',
     'admin' => 'Administrator',
@@ -28,8 +29,6 @@ $roleLabels = [
     'registrar' => 'Registrar',
     'admission' => 'Admissions',
 ];
-$backUrl = isset($roleLabels[$role]) ? "/login/$role.php" : '/login/student.php';
-$allowedRoles = ['admin', 'admission', 'registrar', 'teacher', 'student'];
 
 $_SESSION['login_role'] = $role;
 
@@ -57,15 +56,8 @@ if (!$user || $user['status'] !== 'active' || !password_verify($password, $user[
 session_regenerate_id(true);
 unset($user['password_hash']);
 $_SESSION['user'] = $user;
+$_SESSION['last_activity'] = time();
 unset($_SESSION['login_error'], $_SESSION['login_role'], $_SESSION['csrf_token']);
 
-$redirects = [
-    'admin' => '/admin/home.php',
-    'admission' => '/admission/home.php',
-    'registrar' => '/registrar/home.php',
-    'teacher' => '/teacher/home.php',
-    'student' => '/student/home.php',
-];
-
-header('Location: ' . $redirects[$role]);
+header('Location: ' . home_for_role($role));
 exit;

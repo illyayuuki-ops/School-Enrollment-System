@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, ClipboardCheck, GraduationCap, LogOut, Menu, Settings2, UsersRound, X } from 'lucide-react';
+import { Bell, BookOpenCheck, ChevronDown, ClipboardCheck, FileText, GraduationCap, HelpCircle, LogOut, Menu, Settings2, UsersRound, X } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { useState } from 'react';
 import { useGetSession, useLogout, getGetSessionQueryKey } from '@workspace/api-client-react';
@@ -10,6 +10,10 @@ const navItems = [
   { href: '/registrar/students', label: 'Student masterlist', icon: UsersRound, roles: ['admin', 'registrar'] },
   { href: '/teacher/classes', label: 'My classes', icon: GraduationCap, roles: ['admin', 'teacher'] },
   { href: '/student/enrollment', label: 'My enrollment', icon: GraduationCap, roles: ['student'] },
+  { href: '/student/grades', label: 'Grades', icon: BookOpenCheck, roles: ['student'] },
+  { href: '/student/plan-of-study', label: 'Plan of study', icon: ClipboardCheck, roles: ['student'] },
+  { href: '/student/academic-policies', label: 'Academic policies', icon: FileText, roles: ['student'] },
+  { href: '/student/faq', label: 'FAQ', icon: HelpCircle, roles: ['student'] },
   { href: '/admin/settings', label: 'System controls', icon: Settings2, roles: ['admin'] },
 ];
 

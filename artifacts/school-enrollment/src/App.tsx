@@ -8,7 +8,7 @@ import Login from '@/pages/login';
 import Dashboard from '@/pages/dashboard';
 import AdmissionQueue from '@/pages/admission-queue';
 import RegistrarStudents from '@/pages/registrar-students';
-import { AdminSettings, StudentEnrollment, TeacherClasses } from '@/pages/role-pages';
+import { AdminSettings, StudentAcademicPolicies, StudentEnrollment, StudentFaq, StudentGrades, StudentPlanOfStudy, TeacherClasses } from '@/pages/role-pages';
 import { PortalShell } from '@/components/portal-shell';
 import {
   Route,
@@ -31,6 +31,10 @@ function Router() {
         <Route path="/registrar/students"><PortalShell><RegistrarStudents /></PortalShell></Route>
         <Route path="/teacher/classes"><PortalShell><TeacherClasses /></PortalShell></Route>
         <Route path="/student/enrollment"><PortalShell><StudentEnrollment /></PortalShell></Route>
+        <Route path="/student/grades"><PortalShell><StudentGrades /></PortalShell></Route>
+        <Route path="/student/plan-of-study"><PortalShell><StudentPlanOfStudy /></PortalShell></Route>
+        <Route path="/student/academic-policies"><PortalShell><StudentAcademicPolicies /></PortalShell></Route>
+        <Route path="/student/faq"><PortalShell><StudentFaq /></PortalShell></Route>
         <Route path="/admin/settings"><PortalShell><AdminSettings /></PortalShell></Route>
         <Route component={NotFound} />
       </Switch>

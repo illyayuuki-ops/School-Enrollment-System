@@ -23,7 +23,7 @@ export default function Login() {
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    login.mutate({ data: { email, password, role } }, { onSuccess: () => setLocation('/dashboard') });
+    login.mutate({ data: { email, password, role } }, { onSuccess: () => setLocation(role === 'student' ? '/student/enrollment' : '/dashboard') });
   };
 
   return (

@@ -129,6 +129,104 @@ export interface Student {
   status: StudentStatus;
 }
 
+export type StudentEnrollmentEnrollmentStatus = typeof StudentEnrollmentEnrollmentStatus[keyof typeof StudentEnrollmentEnrollmentStatus];
+
+
+export const StudentEnrollmentEnrollmentStatus = {
+  pending: 'pending',
+  verified: 'verified',
+  enrolled: 'enrolled',
+} as const;
+
+export interface StudentCourse {
+  code: string;
+  title: string;
+  units: number;
+  semester: string;
+  academicYear: string;
+  status: string;
+}
+
+export type EnrollmentStepStatus = typeof EnrollmentStepStatus[keyof typeof EnrollmentStepStatus];
+
+
+export const EnrollmentStepStatus = {
+  not_started: 'not_started',
+  in_progress: 'in_progress',
+  completed: 'completed',
+} as const;
+
+export interface EnrollmentStep {
+  key: string;
+  label: string;
+  status: EnrollmentStepStatus;
+  displayOrder: number;
+}
+
+export interface StudentEnrollment {
+  id: number;
+  studentNumber: string;
+  fullName: string;
+  program: string;
+  yearLevel: string;
+  academicYear: string;
+  enrollmentStatus: StudentEnrollmentEnrollmentStatus;
+  courses: StudentCourse[];
+  steps: EnrollmentStep[];
+}
+
+export interface GradeRecord {
+  id: number;
+  academicYear: string;
+  semester: string;
+  yearLevel: string;
+  /** @nullable */
+  section: string | null;
+  code: string;
+  title: string;
+  units: number;
+  finalGrade: string;
+  remark: string;
+}
+
+export interface PlanSubject {
+  id: number;
+  yearLevel: string;
+  semester: string;
+  code: string;
+  description: string;
+  units: number;
+  prerequisite: string;
+  curriculumYear: string;
+  status: string;
+  displayOrder: number;
+}
+
+export interface PolicyPage {
+  pageNumber: number;
+  heading: string;
+  body: string;
+}
+
+export interface PolicyDocument {
+  id: number;
+  title: string;
+  fileName: string;
+  academicYear: string;
+  pageCount: number;
+  summary: string;
+  updatedAt: string;
+  pages: PolicyPage[];
+}
+
+export interface FaqEntry {
+  id: number;
+  question: string;
+  answer: string;
+  displayOrder: number;
+  updatedAt: string;
+}
+
 export type ListEnrollmentQueueParams = {
 status?: ListEnrollmentQueueStatus;
 };
@@ -142,4 +240,14 @@ export const ListEnrollmentQueueStatus = {
   verified: 'verified',
   enrolled: 'enrolled',
 } as const;
+
+export type ListStudentGradesParams = {
+academicYear?: string;
+semester?: string;
+};
+
+export type ListStudentPlanOfStudyParams = {
+yearLevel?: string;
+semester?: string;
+};
 

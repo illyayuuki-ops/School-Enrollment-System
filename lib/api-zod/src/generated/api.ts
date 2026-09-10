@@ -144,3 +144,110 @@ export const ListStudentsResponseItem = zod.object({
 export const ListStudentsResponse = zod.array(ListStudentsResponseItem)
 
 
+/**
+ * @summary Get the authenticated student's enrollment record
+ */
+export const GetStudentEnrollmentResponse = zod.object({
+  "id": zod.number().int(),
+  "studentNumber": zod.string(),
+  "fullName": zod.string(),
+  "program": zod.string(),
+  "yearLevel": zod.string(),
+  "academicYear": zod.string(),
+  "enrollmentStatus": zod.enum(['pending', 'verified', 'enrolled']),
+  "courses": zod.array(zod.object({
+  "code": zod.string(),
+  "title": zod.string(),
+  "units": zod.number().int(),
+  "semester": zod.string(),
+  "academicYear": zod.string(),
+  "status": zod.string()
+})),
+  "steps": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "status": zod.enum(['not_started', 'in_progress', 'completed']),
+  "displayOrder": zod.number().int()
+}))
+})
+
+
+/**
+ * @summary List grades for the authenticated student
+ */
+export const ListStudentGradesQueryParams = zod.object({
+  "academicYear": zod.coerce.string().optional(),
+  "semester": zod.coerce.string().optional()
+})
+
+export const ListStudentGradesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "academicYear": zod.string(),
+  "semester": zod.string(),
+  "yearLevel": zod.string(),
+  "section": zod.string().nullable(),
+  "code": zod.string(),
+  "title": zod.string(),
+  "units": zod.number().int(),
+  "finalGrade": zod.string(),
+  "remark": zod.string()
+})
+export const ListStudentGradesResponse = zod.array(ListStudentGradesResponseItem)
+
+
+/**
+ * @summary List the authenticated student's plan of study
+ */
+export const ListStudentPlanOfStudyQueryParams = zod.object({
+  "yearLevel": zod.coerce.string().optional(),
+  "semester": zod.coerce.string().optional()
+})
+
+export const ListStudentPlanOfStudyResponseItem = zod.object({
+  "id": zod.number().int(),
+  "yearLevel": zod.string(),
+  "semester": zod.string(),
+  "code": zod.string(),
+  "description": zod.string(),
+  "units": zod.number().int(),
+  "prerequisite": zod.string(),
+  "curriculumYear": zod.string(),
+  "status": zod.string(),
+  "displayOrder": zod.number().int()
+})
+export const ListStudentPlanOfStudyResponse = zod.array(ListStudentPlanOfStudyResponseItem)
+
+
+/**
+ * @summary List published academic policy documents and pages
+ */
+export const ListAcademicPoliciesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "fileName": zod.string(),
+  "academicYear": zod.string(),
+  "pageCount": zod.number().int(),
+  "summary": zod.string(),
+  "updatedAt": zod.coerce.date(),
+  "pages": zod.array(zod.object({
+  "pageNumber": zod.number().int(),
+  "heading": zod.string(),
+  "body": zod.string()
+}))
+})
+export const ListAcademicPoliciesResponse = zod.array(ListAcademicPoliciesResponseItem)
+
+
+/**
+ * @summary List active frequently asked questions
+ */
+export const ListFaqEntriesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "question": zod.string(),
+  "answer": zod.string(),
+  "displayOrder": zod.number().int(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListFaqEntriesResponse = zod.array(ListFaqEntriesResponseItem)
+
+

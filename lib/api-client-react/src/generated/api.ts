@@ -22,12 +22,19 @@ import type {
 import type {
   DashboardSummary,
   EnrollmentApplicant,
+  FaqEntry,
+  GradeRecord,
   HealthStatus,
   ListEnrollmentQueueParams,
+  ListStudentGradesParams,
+  ListStudentPlanOfStudyParams,
   LoginInput,
+  PlanSubject,
+  PolicyDocument,
   ReviewEnrollmentInput,
   SessionUser,
-  Student
+  Student,
+  StudentEnrollment
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -652,6 +659,405 @@ export function useListStudents<TData = Awaited<ReturnType<typeof listStudents>>
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getListStudentsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStudentEnrollmentUrl = () => {
+
+
+
+
+  return `/api/students/me/enrollment`
+}
+
+/**
+ * @summary Get the authenticated student's enrollment record
+ */
+export const getStudentEnrollment = async ( options?: Parameters<typeof customFetch>[1]): Promise<StudentEnrollment> => {
+
+  return customFetch<StudentEnrollment>(getGetStudentEnrollmentUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentEnrollmentQueryKey = () => {
+    return [
+    `/api/students/me/enrollment`
+    ] as const;
+    }
+
+
+export const getGetStudentEnrollmentQueryOptions = <TData = Awaited<ReturnType<typeof getStudentEnrollment>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentEnrollment>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentEnrollmentQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentEnrollment>>> = ({ signal }) => getStudentEnrollment({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentEnrollment>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentEnrollmentQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentEnrollment>>>
+export type GetStudentEnrollmentQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get the authenticated student's enrollment record
+ */
+
+export function useGetStudentEnrollment<TData = Awaited<ReturnType<typeof getStudentEnrollment>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentEnrollment>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentEnrollmentQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListStudentGradesUrl = (params?: ListStudentGradesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/students/me/grades?${stringifiedParams}` : `/api/students/me/grades`
+}
+
+/**
+ * @summary List grades for the authenticated student
+ */
+export const listStudentGrades = async (params?: ListStudentGradesParams, options?: Parameters<typeof customFetch>[1]): Promise<GradeRecord[]> => {
+
+  return customFetch<GradeRecord[]>(getListStudentGradesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListStudentGradesQueryKey = (params?: ListStudentGradesParams,) => {
+    return [
+    `/api/students/me/grades`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListStudentGradesQueryOptions = <TData = Awaited<ReturnType<typeof listStudentGrades>>, TError = ErrorType<void>>(params?: ListStudentGradesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStudentGrades>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListStudentGradesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStudentGrades>>> = ({ signal }) => listStudentGrades(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStudentGrades>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListStudentGradesQueryResult = NonNullable<Awaited<ReturnType<typeof listStudentGrades>>>
+export type ListStudentGradesQueryError = ErrorType<void>
+
+
+/**
+ * @summary List grades for the authenticated student
+ */
+
+export function useListStudentGrades<TData = Awaited<ReturnType<typeof listStudentGrades>>, TError = ErrorType<void>>(
+ params?: ListStudentGradesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStudentGrades>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListStudentGradesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListStudentPlanOfStudyUrl = (params?: ListStudentPlanOfStudyParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/students/me/plan-of-study?${stringifiedParams}` : `/api/students/me/plan-of-study`
+}
+
+/**
+ * @summary List the authenticated student's plan of study
+ */
+export const listStudentPlanOfStudy = async (params?: ListStudentPlanOfStudyParams, options?: Parameters<typeof customFetch>[1]): Promise<PlanSubject[]> => {
+
+  return customFetch<PlanSubject[]>(getListStudentPlanOfStudyUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListStudentPlanOfStudyQueryKey = (params?: ListStudentPlanOfStudyParams,) => {
+    return [
+    `/api/students/me/plan-of-study`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListStudentPlanOfStudyQueryOptions = <TData = Awaited<ReturnType<typeof listStudentPlanOfStudy>>, TError = ErrorType<void>>(params?: ListStudentPlanOfStudyParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStudentPlanOfStudy>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListStudentPlanOfStudyQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStudentPlanOfStudy>>> = ({ signal }) => listStudentPlanOfStudy(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStudentPlanOfStudy>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListStudentPlanOfStudyQueryResult = NonNullable<Awaited<ReturnType<typeof listStudentPlanOfStudy>>>
+export type ListStudentPlanOfStudyQueryError = ErrorType<void>
+
+
+/**
+ * @summary List the authenticated student's plan of study
+ */
+
+export function useListStudentPlanOfStudy<TData = Awaited<ReturnType<typeof listStudentPlanOfStudy>>, TError = ErrorType<void>>(
+ params?: ListStudentPlanOfStudyParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStudentPlanOfStudy>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListStudentPlanOfStudyQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListAcademicPoliciesUrl = () => {
+
+
+
+
+  return `/api/academic-policies`
+}
+
+/**
+ * @summary List published academic policy documents and pages
+ */
+export const listAcademicPolicies = async ( options?: Parameters<typeof customFetch>[1]): Promise<PolicyDocument[]> => {
+
+  return customFetch<PolicyDocument[]>(getListAcademicPoliciesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAcademicPoliciesQueryKey = () => {
+    return [
+    `/api/academic-policies`
+    ] as const;
+    }
+
+
+export const getListAcademicPoliciesQueryOptions = <TData = Awaited<ReturnType<typeof listAcademicPolicies>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAcademicPolicies>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAcademicPoliciesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAcademicPolicies>>> = ({ signal }) => listAcademicPolicies({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAcademicPolicies>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAcademicPoliciesQueryResult = NonNullable<Awaited<ReturnType<typeof listAcademicPolicies>>>
+export type ListAcademicPoliciesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List published academic policy documents and pages
+ */
+
+export function useListAcademicPolicies<TData = Awaited<ReturnType<typeof listAcademicPolicies>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAcademicPolicies>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAcademicPoliciesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListFaqEntriesUrl = () => {
+
+
+
+
+  return `/api/faq`
+}
+
+/**
+ * @summary List active frequently asked questions
+ */
+export const listFaqEntries = async ( options?: Parameters<typeof customFetch>[1]): Promise<FaqEntry[]> => {
+
+  return customFetch<FaqEntry[]>(getListFaqEntriesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListFaqEntriesQueryKey = () => {
+    return [
+    `/api/faq`
+    ] as const;
+    }
+
+
+export const getListFaqEntriesQueryOptions = <TData = Awaited<ReturnType<typeof listFaqEntries>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFaqEntries>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListFaqEntriesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listFaqEntries>>> = ({ signal }) => listFaqEntries({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listFaqEntries>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListFaqEntriesQueryResult = NonNullable<Awaited<ReturnType<typeof listFaqEntries>>>
+export type ListFaqEntriesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List active frequently asked questions
+ */
+
+export function useListFaqEntries<TData = Awaited<ReturnType<typeof listFaqEntries>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listFaqEntries>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListFaqEntriesQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

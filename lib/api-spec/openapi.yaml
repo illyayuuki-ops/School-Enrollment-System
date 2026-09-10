@@ -18,6 +18,10 @@ tags:
     description: Applicant verification queue operations
   - name: students
     description: Student masterlist operations
+  - name: academics
+    description: Authenticated student academic records
+  - name: resources
+    description: Academic policies and frequently asked questions
 paths:
   /healthz:
     get:
@@ -145,6 +149,102 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Student"
+  /students/me/enrollment:
+    get:
+      operationId: getStudentEnrollment
+      tags: [academics]
+      summary: Get the authenticated student's enrollment record
+      responses:
+        "200":
+          description: Enrollment record and progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentEnrollment"
+        "401":
+          description: No active session
+        "403":
+          description: The active user is not a student
+        "404":
+          description: Student record not found
+  /students/me/grades:
+    get:
+      operationId: listStudentGrades
+      tags: [academics]
+      summary: List grades for the authenticated student
+      parameters:
+        - name: academicYear
+          in: query
+          schema: { type: string }
+        - name: semester
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Student grades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GradeRecord"
+        "401":
+          description: No active session
+        "403":
+          description: The active user is not a student
+  /students/me/plan-of-study:
+    get:
+      operationId: listStudentPlanOfStudy
+      tags: [academics]
+      summary: List the authenticated student's plan of study
+      parameters:
+        - name: yearLevel
+          in: query
+          schema: { type: string }
+        - name: semester
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Student plan of study subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlanSubject"
+        "401":
+          description: No active session
+        "403":
+          description: The active user is not a student
+  /academic-policies:
+    get:
+      operationId: listAcademicPolicies
+      tags: [resources]
+      summary: List published academic policy documents and pages
+      responses:
+        "200":
+          description: Academic policy documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PolicyDocument"
+  /faq:
+    get:
+      operationId: listFaqEntries
+      tags: [resources]
+      summary: List active frequently asked questions
+      responses:
+        "200":
+          description: Frequently asked questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FaqEntry"
 components:
   schemas:
     HealthStatus:
@@ -243,4 +343,104 @@ components:
           type: string
           enum: [active, probation, pending]
       required: [id, studentNumber, fullName, program, yearLevel, load, status]
+    StudentEnrollment:
+      type: object
+      properties:
+        id: { type: integer }
+        studentNumber: { type: string }
+        fullName: { type: string }
+        program: { type: string }
+        yearLevel: { type: string }
+        academicYear: { type: string }
+        enrollmentStatus:
+          type: string
+          enum: [pending, verified, enrolled]
+        courses:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudentCourse"
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnrollmentStep"
+      required: [id, studentNumber, fullName, program, yearLevel, academicYear, enrollmentStatus, courses, steps]
+    EnrollmentStep:
+      type: object
+      properties:
+        key: { type: string }
+        label: { type: string }
+        status:
+          type: string
+          enum: [not_started, in_progress, completed]
+        displayOrder: { type: integer }
+      required: [key, label, status, displayOrder]
+    StudentCourse:
+      type: object
+      properties:
+        code: { type: string }
+        title: { type: string }
+        units: { type: integer }
+        semester: { type: string }
+        academicYear: { type: string }
+        status: { type: string }
+      required: [code, title, units, semester, academicYear, status]
+    GradeRecord:
+      type: object
+      properties:
+        id: { type: integer }
+        academicYear: { type: string }
+        semester: { type: string }
+        yearLevel: { type: string }
+        section: { type: ["string", "null"] }
+        code: { type: string }
+        title: { type: string }
+        units: { type: integer }
+        finalGrade: { type: string }
+        remark: { type: string }
+      required: [id, academicYear, semester, yearLevel, section, code, title, units, finalGrade, remark]
+    PlanSubject:
+      type: object
+      properties:
+        id: { type: integer }
+        yearLevel: { type: string }
+        semester: { type: string }
+        code: { type: string }
+        description: { type: string }
+        units: { type: integer }
+        prerequisite: { type: string }
+        curriculumYear: { type: string }
+        status: { type: string }
+        displayOrder: { type: integer }
+      required: [id, yearLevel, semester, code, description, units, prerequisite, curriculumYear, status, displayOrder]
+    PolicyPage:
+      type: object
+      properties:
+        pageNumber: { type: integer }
+        heading: { type: string }
+        body: { type: string }
+      required: [pageNumber, heading, body]
+    PolicyDocument:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        fileName: { type: string }
+        academicYear: { type: string }
+        pageCount: { type: integer }
+        summary: { type: string }
+        updatedAt: { type: string, format: date-time }
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/PolicyPage"
+      required: [id, title, fileName, academicYear, pageCount, summary, updatedAt, pages]
+    FaqEntry:
+      type: object
+      properties:
+        id: { type: integer }
+        question: { type: string }
+        answer: { type: string }
+        displayOrder: { type: integer }
+        updatedAt: { type: string, format: date-time }
+      required: [id, question, answer, displayOrder, updatedAt]
 

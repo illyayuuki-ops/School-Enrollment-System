@@ -2,7 +2,55 @@ CREATE TYPE user_role AS ENUM ('admin', 'admission', 'registrar', 'teacher', 'st
 CREATE TYPE user_status AS ENUM ('active', 'suspended');
 CREATE TYPE enrollment_status AS ENUM ('pending', 'verified', 'enrolled');
 
+CREATE TABLE IF NOT EXISTS enrollment_levels (
+    id SERIAL PRIMARY KEY,
+    level_type VARCHAR(20) NOT NULL,
+    name VARCHAR(120) NOT NULL,
+    display_order INT NOT NULL DEFAULT 0,
+    active BOOLEAN NOT NULL DEFAULT TRUE
+);
+INSERT INTO enrollment_levels (level_type, name, display_order) VALUES
+    ('BED', 'Grade 7', 1), ('BED', 'Grade 8', 2), ('BED', 'Grade 9', 3),
+    ('BED', 'Grade 10', 4), ('BED', 'Grade 11', 5), ('BED', 'Grade 12', 6),
+    ('College', '1st Year', 1), ('College', '2nd Year', 2),
+    ('College', '3rd Year', 3), ('College', '4th Year', 4),
+    ('TESDA', 'NC I', 1), ('TESDA', 'NC II', 2), ('TESDA', 'NC III', 3);
+
+CREATE TABLE IF NOT EXISTS enrollment_courses (
+    id SERIAL PRIMARY KEY,
+    level_type VARCHAR(20) NOT NULL,
+    name VARCHAR(160) NOT NULL,
+    major_track VARCHAR(120) NULL,
+    display_order INT NOT NULL DEFAULT 0,
+    active BOOLEAN NOT NULL DEFAULT TRUE
+);
+INSERT INTO enrollment_courses (level_type, name, major_track, display_order) VALUES
+    ('College', 'BS Information Technology', NULL, 1),
+    ('College', 'BS Accountancy', NULL, 2),
+    ('College', 'BS Education', NULL, 3),
+    ('TESDA', 'Cookery', NULL, 1),
+    ('TESDA', 'Bookkeeping', NULL, 2),
+    ('TESDA', 'Computer Systems Servicing', NULL, 3);
+
+CREATE TABLE IF NOT EXISTS enrollment_semesters (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(40) NOT NULL,
+    display_order INT NOT NULL
+);
+INSERT INTO enrollment_semesters (name, display_order) VALUES
+    ('1st Semester', 1), ('2nd Semester', 2);
+
+CREATE TABLE IF NOT EXISTS pre_admission_codes (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(60) NOT NULL UNIQUE,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+INSERT INTO pre_admission_codes (code) VALUES
+    ('SMA-PRE-2024-001'), ('SMA-PRE-2024-002'), ('SMA-PRE-2024-003');
+
 CREATE TABLE IF NOT EXISTS users (
+    ...
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
@@ -114,10 +162,61 @@ CREATE TABLE IF NOT EXISTS academic_policy_pages (
 );
 
 CREATE TABLE IF NOT EXISTS faq_entries (
-  id SERIAL PRIMARY KEY,
-  question VARCHAR(240) NOT NULL,
-  answer TEXT NOT NULL,
-  display_order INTEGER NOT NULL,
-  active BOOLEAN NOT NULL DEFAULT TRUE,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    question VARCHAR(240) NOT NULL,
+    answer TEXT NOT NULL,
+    display_order INTEGER NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS pre_registrations (
+    id SERIAL PRIMARY KEY,
+    application_number VARCHAR(40) UNIQUE,
+    enrollee_type VARCHAR(20) NOT NULL DEFAULT 'new',
+    level_type VARCHAR(20) NOT NULL,
+    level VARCHAR(120) NOT NULL DEFAULT '-',
+    semester VARCHAR(40) NOT NULL DEFAULT '-',
+    modality VARCHAR(40) NOT NULL DEFAULT 'FACE-TO-FACE',
+    first_choice_course VARCHAR(160) NOT NULL DEFAULT '-',
+    first_major_track VARCHAR(120) NOT NULL DEFAULT '-',
+    second_choice_course VARCHAR(160) NOT NULL DEFAULT '-',
+    second_major_track VARCHAR(120) NOT NULL DEFAULT '-',
+    nc_level VARCHAR(20) NOT NULL DEFAULT '-',
+    email VARCHAR(255) NOT NULL,
+    contact_number VARCHAR(40) NOT NULL DEFAULT '-',
+    lrn VARCHAR(20) NOT NULL DEFAULT '-',
+    last_name VARCHAR(80) NOT NULL,
+    first_name VARCHAR(80) NOT NULL,
+    middle_name VARCHAR(80) NOT NULL DEFAULT '-',
+    date_of_birth DATE,
+    place_of_birth VARCHAR(160) NOT NULL DEFAULT '-',
+    gender VARCHAR(20) NOT NULL DEFAULT '-',
+    nationality VARCHAR(60) NOT NULL DEFAULT 'FILIPINO',
+    religion VARCHAR(60) NOT NULL DEFAULT '-',
+    street_no VARCHAR(40) NOT NULL DEFAULT '-',
+    street_name VARCHAR(120) NOT NULL DEFAULT '-',
+    subdivision VARCHAR(120) NOT NULL DEFAULT '-',
+    province VARCHAR(80) NOT NULL DEFAULT '-',
+    town_city VARCHAR(80) NOT NULL DEFAULT '-',
+    barangay VARCHAR(80) NOT NULL DEFAULT '-',
+    father_name VARCHAR(160) NOT NULL DEFAULT '-',
+    father_occupation VARCHAR(120) NOT NULL DEFAULT '-',
+    father_mobile VARCHAR(40) NOT NULL DEFAULT '-',
+    mother_name VARCHAR(160) NOT NULL DEFAULT '-',
+    mother_occupation VARCHAR(120) NOT NULL DEFAULT '-',
+    mother_mobile VARCHAR(40) NOT NULL DEFAULT '-',
+    guardian_name VARCHAR(160) NOT NULL DEFAULT '-',
+    guardian_occupation VARCHAR(120) NOT NULL DEFAULT '-',
+    guardian_mobile VARCHAR(40) NOT NULL DEFAULT '-',
+    guardian_email VARCHAR(255) NOT NULL DEFAULT '-',
+    school_last_attended VARCHAR(180) NOT NULL DEFAULT '-',
+    school_address VARCHAR(200) NOT NULL DEFAULT '-',
+    school_year VARCHAR(20) NOT NULL DEFAULT '-',
+    comorbidity VARCHAR(120) NOT NULL DEFAULT '-',
+    parental_consent VARCHAR(20) NOT NULL DEFAULT '-',
+    mode_of_transportation VARCHAR(40) NOT NULL DEFAULT '-',
+    pre_admission_code VARCHAR(60) NOT NULL DEFAULT '-',
+    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

@@ -15,7 +15,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Steiner Maris Academy · SMA Portal</title>
+    <title>Sign in · Steiner Maris Academy</title>
     <link rel="icon" type="image/png" href="/assets/logo.png">
     <link rel="stylesheet" href="/assets/app.css">
     <link rel="stylesheet" href="/assets/login.css">
@@ -24,7 +24,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
     <div class="portal-frame">
         <aside class="portal-sidebar">
             <a class="portal-brand" href="/login/<?= htmlspecialchars($role, ENT_QUOTES, 'UTF-8') ?>.php" aria-label="Steiner Maris Academy SMA Portal">
-                <img class="portal-logo" src="/assets/logo.png" alt="Steiner Maris Academy logo">
+                <img src="/assets/logo.png" alt="Steiner Maris Academy" class="brand-logo" style="height:40px;width:auto">
                 <span class="portal-brand-copy">
                     <strong>Steiner Maris Academy</strong>
                     <small>SMA Portal</small>
@@ -72,7 +72,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
                         <div class="card-heading">
                             <span class="eyebrow">Secure workspace</span>
                             <h2 id="signin-title"><?= htmlspecialchars($roleLabels[$role], ENT_QUOTES, 'UTF-8') ?> Portal</h2>
-                            <p class="muted">Sign-in to continue to your <?= htmlspecialchars($roleLabels[$role], ENT_QUOTES, 'UTF-8') ?> workspace.</p>
+                            <p class="muted">Sign in to the SMA portal.</p>
                         </div>
 
                         <?php if ($expired): ?>
@@ -100,11 +100,17 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
 
                             <div class="form-actions">
                                 <button type="button" class="text-button" data-open-forgot>Forgot password?</button>
-                                <button class="button button-primary" type="submit">Login <span aria-hidden="true">→</span></button>
+                                <button class="button button-primary" type="submit">Sign in <span aria-hidden="true">→</span></button>
                             </div>
                         </form>
 
                         <p class="auth-help">Protected by Steiner Maris Academy access controls.</p>
+
+                        <?php if ($role === 'student'): ?>
+                            <p class="auth-help" style="margin-top: 12px;">
+                                New student? <a href="/register.php" style="color: var(--green); font-weight: 700;">Register here</a>
+                            </p>
+                        <?php endif; ?>
                     </section>
                 </div>
             </section>

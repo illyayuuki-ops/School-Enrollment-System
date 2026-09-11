@@ -1,0 +1,128 @@
+.enrollment-form .form-section {
+    margin-bottom: 24px;
+}
+.enrollment-form .form-section h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+.enrollment-form .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+.enrollment-form .form-field {
+    display: grid;
+    gap: 6px;
+}
+.enrollment-form .form-field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #40584d;
+}
+.enrollment-form .form-field input,
+.enrollment-form .form-field select,
+.enrollment-form .form-field textarea {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #ccdcd5;
+    border-radius: 8px;
+    background: #fbfdfc;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.enrollment-form .form-field input::placeholder,
+.enrollment-form .form-field textarea::placeholder {
+    color: #91a49b;
+}
+.enrollment-form .form-field input:hover,
+.enrollment-form .form-field select:hover,
+.enrollment-form .form-field textarea:hover {
+    border-color: #a9c5b8;
+}
+.enrollment-form .form-field input:focus,
+.enrollment-form .form-field select:focus,
+.enrollment-form .form-field textarea:focus {
+    border-color: var(--green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(5,150,105,.12);
+    outline: none;
+}
+.enrollment-form .form-field small.muted {
+    font-size: 11px;
+    color: var(--muted);
+}
+.enrollment-form .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+.enrollment-form .radio-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+}
+.enrollment-form .radio-group input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--green);
+}
+.enrollment-form .contact-strip {
+    background: #f0f5f3;
+    border: 1px solid #dce8e2;
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+.enrollment-form .contact-strip h3 {
+    border-color: #dce8e2;
+}
+.enrollment-form .form-actions {
+    margin-top: 28px;
+    display: flex;
+    justify-content: flex-end;
+}
+.enrollment-form .alert-success {
+    background: #e4f7f0;
+    color: var(--green);
+    border: 1px solid #b8e5d2;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+.enrollment-form .alert-success code {
+    background: rgba(255,255,255,.6);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+}
+.enrollment-form [data-show-for] {
+    transition: opacity .15s ease, height .15s ease;
+}
+.enrollment-form [data-show-for].hidden {
+    display: none !important;
+}
+@media (max-width: 640px) {
+    .enrollment-form .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .enrollment-form .radio-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

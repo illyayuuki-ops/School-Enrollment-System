@@ -112,18 +112,8 @@ $today = (new DateTime())->format('F j, Y');
                         <div class="alert alert-error" role="alert"><?= htmlspecialchars($error) ?></div>
                     <?php endif; ?>
 
-                    <form method="post" action="/register_submit.php" novalidate id="enrollment-form">
+                    <form method="post" action="/register_submit.php" novalidate id="enrollment-form" class="enrollment-form">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-
-                        <div class="form-section">
-                            <h3>Application Type</h3>
-                            <div class="form-row radio-group" data-field="enrollee_type">
-                                <label><input type="radio" name="enrollee_type" value="new" <?= ($old['enrollee_type'] ?? 'new') === 'new' ? 'checked' : '' ?>> New</label>
-                                <label><input type="radio" name="enrollee_type" value="old" <?= ($old['enrollee_type'] ?? '') === 'old' ? 'checked' : '' ?>> Old</label>
-                                <label><input type="radio" name="enrollee_type" value="returnee" <?= ($old['enrollee_type'] ?? '') === 'returnee' ? 'checked' : '' ?>> Returnee</label>
-                                <label><input type="radio" name="enrollee_type" value="recontinue" <?= ($old['enrollee_type'] ?? '') === 'recontinue' ? 'checked' : '' ?>> Recontinue</label>
-                            </div>
-                        </div>
 
                         <div class="form-section">
                             <h3>Program Selection</h3>

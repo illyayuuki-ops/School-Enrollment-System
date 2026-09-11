@@ -1,6 +1,17 @@
-CREATE TYPE user_role AS ENUM ('admin', 'admission', 'registrar', 'teacher', 'student');
-CREATE TYPE user_status AS ENUM ('active', 'suspended');
-CREATE TYPE enrollment_status AS ENUM ('pending', 'verified', 'enrolled');
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('admin', 'admission', 'registrar', 'teacher', 'student');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE user_status AS ENUM ('active', 'suspended');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE enrollment_status AS ENUM ('pending', 'verified', 'enrolled');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TABLE IF NOT EXISTS enrollment_levels (
     id SERIAL PRIMARY KEY,
@@ -14,7 +25,8 @@ INSERT INTO enrollment_levels (level_type, name, display_order) VALUES
     ('BED', 'Grade 10', 4), ('BED', 'Grade 11', 5), ('BED', 'Grade 12', 6),
     ('College', '1st Year', 1), ('College', '2nd Year', 2),
     ('College', '3rd Year', 3), ('College', '4th Year', 4),
-    ('TESDA', 'NC I', 1), ('TESDA', 'NC II', 2), ('TESDA', 'NC III', 3);
+    ('TESDA', 'NC I', 1), ('TESDA', 'NC II', 2), ('TESDA', 'NC III', 3)
+ON CONFLICT (level_type, name) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS enrollment_courses (
     id SERIAL PRIMARY KEY,
@@ -30,7 +42,8 @@ INSERT INTO enrollment_courses (level_type, name, major_track, display_order) VA
     ('College', 'BS Education', NULL, 3),
     ('TESDA', 'Cookery', NULL, 1),
     ('TESDA', 'Bookkeeping', NULL, 2),
-    ('TESDA', 'Computer Systems Servicing', NULL, 3);
+    ('TESDA', 'Computer Systems Servicing', NULL, 3)
+ON CONFLICT (level_type, name) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS enrollment_semesters (
     id SERIAL PRIMARY KEY,
@@ -38,7 +51,8 @@ CREATE TABLE IF NOT EXISTS enrollment_semesters (
     display_order INT NOT NULL
 );
 INSERT INTO enrollment_semesters (name, display_order) VALUES
-    ('1st Semester', 1), ('2nd Semester', 2);
+    ('1st Semester', 1), ('2nd Semester', 2)
+ON CONFLICT (name) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS pre_admission_codes (
     id SERIAL PRIMARY KEY,
@@ -47,118 +61,121 @@ CREATE TABLE IF NOT EXISTS pre_admission_codes (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 INSERT INTO pre_admission_codes (code) VALUES
-    ('SMA-PRE-2024-001'), ('SMA-PRE-2024-002'), ('SMA-PRE-2024-003');
+    ('SMA-PRE-2024-001'), ('SMA-PRE-2024-002'), ('SMA-PRE-2024-003')
+ON CONFLICT (code) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS users (
-    ...
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
-  full_name VARCHAR(160) NOT NULL,
-  role user_role NOT NULL,
-  status user_status NOT NULL DEFAULT 'active',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    full_name VARCHAR(160) NOT NULL,
+    role user_role NOT NULL,
+    status user_status NOT NULL DEFAULT 'active',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS students (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id),
-  student_number VARCHAR(32) NOT NULL UNIQUE,
-  enrollment_status enrollment_status NOT NULL DEFAULT 'pending',
-  academic_year VARCHAR(20) NOT NULL,
-  current_load_id INTEGER,
-  program VARCHAR(160) NOT NULL,
-  year_level VARCHAR(40) NOT NULL
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    student_number VARCHAR(32) NOT NULL UNIQUE,
+    enrollment_status enrollment_status NOT NULL DEFAULT 'pending',
+    academic_year VARCHAR(20) NOT NULL,
+    current_load_id INTEGER,
+    program VARCHAR(160) NOT NULL,
+    year_level VARCHAR(40) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS enrollment_queue (
-  id SERIAL PRIMARY KEY,
-  student_id INTEGER NOT NULL REFERENCES students(id),
-  document_url TEXT,
-  verification_remarks TEXT,
-  reviewed_by INTEGER REFERENCES users(id),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    document_url TEXT,
+    verification_remarks TEXT,
+    reviewed_by INTEGER REFERENCES users(id),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS classes_and_schedules (
-  id SERIAL PRIMARY KEY,
-  subject_code VARCHAR(32) NOT NULL,
-  subject_name VARCHAR(180) NOT NULL,
-  teacher_id INTEGER REFERENCES users(id),
-  schedule_grid TEXT NOT NULL,
-  room VARCHAR(80) NOT NULL,
-  capacity INTEGER NOT NULL,
-  enrolled_count INTEGER NOT NULL DEFAULT 0
+    id SERIAL PRIMARY KEY,
+    subject_code VARCHAR(32) NOT NULL,
+    subject_name VARCHAR(180) NOT NULL,
+    teacher_id INTEGER REFERENCES users(id),
+    schedule_grid TEXT NOT NULL,
+    room VARCHAR(80) NOT NULL,
+    capacity INTEGER NOT NULL,
+    enrolled_count INTEGER NOT NULL DEFAULT 0
 );
 
-CREATE TYPE enrollment_step_status AS ENUM ('not_started', 'in_progress', 'completed');
+DO $$ BEGIN
+    CREATE TYPE enrollment_step_status AS ENUM ('not_started', 'in_progress', 'completed');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TABLE IF NOT EXISTS student_enrollment_steps (
-  id SERIAL PRIMARY KEY,
-  student_id INTEGER NOT NULL REFERENCES students(id),
-  step_key VARCHAR(40) NOT NULL,
-  label VARCHAR(120) NOT NULL,
-  status enrollment_step_status NOT NULL DEFAULT 'not_started',
-  display_order INTEGER NOT NULL,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (student_id, step_key)
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    step_key VARCHAR(40) NOT NULL,
+    label VARCHAR(120) NOT NULL,
+    status enrollment_step_status NOT NULL DEFAULT 'not_started',
+    display_order INTEGER NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (student_id, step_key)
 );
 
 CREATE TABLE IF NOT EXISTS student_courses (
-  id SERIAL PRIMARY KEY,
-  student_id INTEGER NOT NULL REFERENCES students(id),
-  academic_year VARCHAR(20) NOT NULL,
-  semester VARCHAR(40) NOT NULL,
-  subject_code VARCHAR(32) NOT NULL,
-  subject_name VARCHAR(180) NOT NULL,
-  units INTEGER NOT NULL,
-  status VARCHAR(30) NOT NULL DEFAULT 'enrolled'
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    academic_year VARCHAR(20) NOT NULL,
+    semester VARCHAR(40) NOT NULL,
+    subject_code VARCHAR(32) NOT NULL,
+    subject_name VARCHAR(180) NOT NULL,
+    units INTEGER NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'enrolled'
 );
 
 CREATE TABLE IF NOT EXISTS student_grades (
-  id SERIAL PRIMARY KEY,
-  student_id INTEGER NOT NULL REFERENCES students(id),
-  academic_year VARCHAR(20) NOT NULL,
-  semester VARCHAR(40) NOT NULL,
-  year_level VARCHAR(40) NOT NULL,
-  section VARCHAR(40),
-  subject_code VARCHAR(32) NOT NULL,
-  subject_name VARCHAR(180) NOT NULL,
-  units INTEGER NOT NULL,
-  final_grade VARCHAR(20) NOT NULL,
-  remark VARCHAR(80) NOT NULL
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    academic_year VARCHAR(20) NOT NULL,
+    semester VARCHAR(40) NOT NULL,
+    year_level VARCHAR(40) NOT NULL,
+    section VARCHAR(40),
+    subject_code VARCHAR(32) NOT NULL,
+    subject_name VARCHAR(180) NOT NULL,
+    units INTEGER NOT NULL,
+    final_grade VARCHAR(20) NOT NULL,
+    remark VARCHAR(80) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS plan_of_study_subjects (
-  id SERIAL PRIMARY KEY,
-  student_id INTEGER NOT NULL REFERENCES students(id),
-  year_level VARCHAR(40) NOT NULL,
-  semester VARCHAR(40) NOT NULL,
-  subject_code VARCHAR(32) NOT NULL,
-  description VARCHAR(180) NOT NULL,
-  units INTEGER NOT NULL,
-  prerequisite VARCHAR(120) NOT NULL DEFAULT '—',
-  curriculum_year VARCHAR(20) NOT NULL,
-  status VARCHAR(30) NOT NULL DEFAULT 'planned',
-  display_order INTEGER NOT NULL
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    year_level VARCHAR(40) NOT NULL,
+    semester VARCHAR(40) NOT NULL,
+    subject_code VARCHAR(32) NOT NULL,
+    description VARCHAR(180) NOT NULL,
+    units INTEGER NOT NULL,
+    prerequisite VARCHAR(120) NOT NULL DEFAULT '—',
+    curriculum_year VARCHAR(20) NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'planned',
+    display_order INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS academic_policy_documents (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR(180) NOT NULL,
-  file_name VARCHAR(180) NOT NULL,
-  academic_year VARCHAR(20) NOT NULL,
-  page_count INTEGER NOT NULL,
-  summary TEXT NOT NULL,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(180) NOT NULL,
+    file_name VARCHAR(180) NOT NULL,
+    academic_year VARCHAR(20) NOT NULL,
+    page_count INTEGER NOT NULL,
+    summary TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS academic_policy_pages (
-  id SERIAL PRIMARY KEY,
-  document_id INTEGER NOT NULL REFERENCES academic_policy_documents(id),
-  page_number INTEGER NOT NULL,
-  heading VARCHAR(180) NOT NULL,
-  body TEXT NOT NULL
+    id SERIAL PRIMARY KEY,
+    document_id INTEGER NOT NULL REFERENCES academic_policy_documents(id),
+    page_number INTEGER NOT NULL,
+    heading VARCHAR(180) NOT NULL,
+    body TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS faq_entries (

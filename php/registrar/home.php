@@ -2,7 +2,40 @@
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('registrar');
+require_once dirname(__DIR__) . '/db_connect.php';
+
+$pdo = db_connect();
+
+// Enrolled students count
+$enrolledStudents = 0;
+$totalStudents = 0;
+$outstandingStudents = 0;
+$totalOutstanding = 0.00;
+try {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM students WHERE enrollment_status = 'enrolled'");
+    $stmt->execute();
+    $enrolledStudents = (int) $stmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM students");
+    $stmt->execute();
+    $totalStudents = (int) $stmt->fetchColumn();
+
+    // Students with outstanding balance
+    $stmt = $pdo->prepare("
+        SELECT COUNT(DISTINCT sl.student_id), COALESCE(SUM(sl.amount_due - sl.amount_paid), 0)
+        FROM student_ledgers sl
+        WHERE sl.amount_due > sl.amount_paid
+    ");
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_NUM);
+    $outstandingStudents = (int) ($result[0] ?? 0);
+    $totalOutstanding = (float) ($result[1] ?? 0);
+} catch (PDOException $e) {
+    // Keep defaults on error
+}
+
 $pageTitle = 'Registrar Overview';
+$extraStyles = ['/assets/registrar.css'];
 require dirname(__DIR__) . '/includes/header.php';
 ?>
 <div class="app-frame">
@@ -13,10 +46,10 @@ require dirname(__DIR__) . '/includes/header.php';
             <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="/logout.php" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="dashboard-grid">
-            <article class="metric-card"><span class="eyebrow">Enrolled students</span><strong>4,692</strong><small><b class="trend-up">+14.2%</b> year over year</small></article>
-            <article class="metric-card"><span class="eyebrow">Pending sections</span><strong>18</strong><small><b class="trend-warn">5 need review</b></small></article>
-            <article class="metric-card"><span class="eyebrow">Graduation candidates</span><strong>892</strong><small>On track for May</small></article>
-            <article class="metric-card accent-card"><span class="eyebrow">Record accuracy</span><strong>99.4%</strong><small>Target <b>99.5%</b></small><div class="progress"><span style="width:99.4%"></span></div></article>
+            <article class="metric-card"><span class="eyebrow">Enrolled students</span><strong><?= number_format($enrolledStudents) ?></strong><small>Total: <?= number_format($totalStudents) ?></small></article>
+            <article class="metric-card"><span class="eyebrow">Students with balance</span><strong><?= number_format($outstandingStudents) ?></strong><small>Of <?= number_format($totalStudents) ?> total</small></article>
+            <article class="metric-card"><span class="eyebrow">Graduation candidates</span><strong>—</strong><small>Draft placeholder</small></article>
+            <article class="metric-card accent-card"><span class="eyebrow">Total outstanding</span><strong>₱<?= number_format($totalOutstanding, 2) ?></strong><small>Across all students</small><div class="progress"><span style="width:0%"></span></div></article>
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">
@@ -25,6 +58,7 @@ require dirname(__DIR__) . '/includes/header.php';
                     <a href="/registrar/students.php"><span class="action-icon blue">01</span><span><strong>Student masterlist</strong><small>Search and manage records</small></span><span class="arrow">↗</span></a>
                     <a href="/registrar/sections.php"><span class="action-icon green">02</span><span><strong>Sectioning</strong><small>Assign students to sections</small></span><span class="arrow">↗</span></a>
                     <a href="/registrar/subjects.php"><span class="action-icon amber">03</span><span><strong>Subject allocation</strong><small>Manage course offerings</small></span><span class="arrow">↗</span></a>
+                    <a href="/registrar/payments.php"><span class="action-icon blue">04</span><span><strong>Payments / Assessment</strong><small>View balances and ledgers</small></span><span class="arrow">↗</span></a>
                 </div>
             </article>
             <article class="panel">

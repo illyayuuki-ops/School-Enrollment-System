@@ -28,19 +28,9 @@ function db_connect(): PDO
         ltrim($parts['path'] ?? '', '/')
     );
 
-    $pdo = new PDO($dsn, $parts['user'] ?? null, $parts['pass'] ?? null, [
+    return new PDO($dsn, $parts['user'] ?? null, $parts['pass'] ?? null, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
-
-    // Run schema bootstrap once per request
-    static $bootstrapped = false;
-    if (!$bootstrapped) {
-        $bootstrapped = true;
-        require_once __DIR__ . '/includes/db_bootstrap.php';
-        ensure_schema($pdo);
-    }
-
-    return $pdo;
 }

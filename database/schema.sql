@@ -237,3 +237,21 @@ CREATE TABLE IF NOT EXISTS pre_registrations (
     status VARCHAR(30) NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS student_ledgers (
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    academic_year VARCHAR(20) NOT NULL,
+    description VARCHAR(180) NOT NULL,
+    amount_due NUMERIC(10,2) NOT NULL DEFAULT 0,
+    amount_paid NUMERIC(10,2) NOT NULL DEFAULT 0,
+    status VARCHAR(30) NOT NULL DEFAULT 'unpaid',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status) VALUES
+    (1, '2026-2027', 'Tuition Fee - 1st Semester', 50000.00, 25000.00, 'partial'),
+    (1, '2026-2027', 'Laboratory Fee', 5000.00, 0.00, 'unpaid'),
+    (1, '2026-2027', 'Library Fee', 2000.00, 2000.00, 'paid'),
+    (2, '2026-2027', 'Tuition Fee - 1st Semester', 50000.00, 50000.00, 'paid'),
+    (2, '2026-2027', 'Miscellaneous Fee', 3000.00, 3000.00, 'paid')
+ON CONFLICT DO NOTHING;

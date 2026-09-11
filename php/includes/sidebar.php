@@ -22,6 +22,7 @@ $navigation = [
         ['label' => 'Student masterlist', 'href' => '/registrar/students.php'],
         ['label' => 'Sectioning', 'href' => '/registrar/sections.php'],
         ['label' => 'Subject allocation', 'href' => '/registrar/subjects.php'],
+        ['label' => 'Payments / Assessment', 'href' => '/registrar/payments.php'],
     ],
     'teacher' => [
         ['label' => 'Overview', 'href' => $roleHome],

@@ -2,7 +2,39 @@
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('admission');
+require_once dirname(__DIR__) . '/db_connect.php';
+
+$pdo = db_connect();
+
+// Live metrics from pre_registrations
+$pendingCount = 0;
+$approvedCount = 0;
+$rejectedCount = 0;
+$totalCount = 0;
+try {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM pre_registrations WHERE status = 'pending'");
+    $stmt->execute();
+    $pendingCount = (int) $stmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM pre_registrations WHERE status = 'approved'");
+    $stmt->execute();
+    $approvedCount = (int) $stmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM pre_registrations WHERE status = 'rejected'");
+    $stmt->execute();
+    $rejectedCount = (int) $stmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM pre_registrations");
+    $stmt->execute();
+    $totalCount = (int) $stmt->fetchColumn();
+} catch (PDOException $e) {
+    // Keep defaults on error
+}
+
+$conversionRate = $totalCount > 0 ? round(($approvedCount / $totalCount) * 100, 1) : 0;
+
 $pageTitle = 'Admissions Overview';
+$extraStyles = ['/assets/admission.css'];
 require dirname(__DIR__) . '/includes/header.php';
 ?>
 <div class="app-frame">
@@ -13,10 +45,10 @@ require dirname(__DIR__) . '/includes/header.php';
             <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="/logout.php" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="dashboard-grid">
-            <article class="metric-card"><span class="eyebrow">New applications</span><strong>1,284</strong><small><b class="trend-up">+8.4%</b> vs last month</small></article>
-            <article class="metric-card"><span class="eyebrow">Pending review</span><strong>86</strong><small><b class="trend-warn">12 due today</b> need attention</small></article>
-            <article class="metric-card"><span class="eyebrow">Verified</span><strong>1,012</strong><small><b class="trend-up">+12%</b> this week</small></article>
-            <article class="metric-card accent-card"><span class="eyebrow">Conversion rate</span><strong>78.6%</strong><small>Target <b>85%</b> by Aug 30</small><div class="progress"><span style="width:78.6%"></span></div></article>
+            <article class="metric-card"><span class="eyebrow">New applications</span><strong><?= number_format($totalCount) ?></strong><small><?= $pendingCount ?> pending review</small></article>
+            <article class="metric-card"><span class="eyebrow">Pending review</span><strong><?= number_format($pendingCount) ?></strong><small><b class="trend-warn"><?= $approvedCount ?> approved, <?= $rejectedCount ?> rejected</b></small></article>
+            <article class="metric-card"><span class="eyebrow">Approved</span><strong><?= number_format($approvedCount) ?></strong><small>Conversion: <?= $conversionRate ?>%</small></article>
+            <article class="metric-card accent-card"><span class="eyebrow">Conversion rate</span><strong><?= $conversionRate ?>%</strong><small>Target <b>85%</b></small><div class="progress"><span style="width:<?= min(100, $conversionRate) ?>%"></span></div></article>
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">

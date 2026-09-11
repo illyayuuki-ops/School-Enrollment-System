@@ -1,0 +1,451 @@
+/* Registrar Portal Stylesheet
+ * Loaded only on registrar pages via $extraStyles in header.php
+ * Uses SMA CSS variables from app.css: --navy, --green, --line, --ink, --muted, --radius, --shadow
+ */
+
+/* ===== Data Table ===== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.data-table thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.data-table thead th:first-child {
+    border-top-left-radius: var(--radius);
+}
+
+.data-table thead th:last-child {
+    border-top-right-radius: var(--radius);
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.15s ease;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background: rgba(15, 81, 50, 0.03);
+}
+
+.data-table tbody tr:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.data-table td {
+    padding: 12px 14px;
+    color: var(--ink);
+    vertical-align: middle;
+}
+
+.data-table td:first-child {
+    padding-left: 14px;
+}
+
+.data-table td:last-child {
+    padding-right: 14px;
+}
+
+.data-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: var(--radius);
+}
+
+.data-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: var(--radius);
+}
+
+/* ===== Search / Filter Bar ===== */
+.search-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.search-bar .form-field {
+    display: grid;
+    gap: 5px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-bar label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #40584d;
+}
+
+.search-bar input,
+.search-bar select {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #ccdcd5;
+    border-radius: 8px;
+    background: #fbfdfc;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.search-bar input:focus,
+.search-bar select:focus {
+    border-color: var(--green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    outline: none;
+}
+
+/* ===== Form Controls (matching enrollment form) ===== */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.form-field {
+    display: grid;
+    gap: 5px;
+}
+
+.form-field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #40584d;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #ccdcd5;
+    border-radius: 8px;
+    background: #fbfdfc;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    border-color: var(--green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    outline: none;
+}
+
+/* ===== Balance Summary Cards ===== */
+.balance-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.balance-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.balance-card .card-label {
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.balance-card .card-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.balance-card .card-value.positive {
+    color: var(--green);
+}
+
+.balance-card .card-value.negative {
+    color: #dc2626;
+}
+
+.balance-card .card-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+/* ===== Payments / Ledger Table ===== */
+.ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.ledger-table thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ledger-table thead th:first-child {
+    border-top-left-radius: var(--radius);
+}
+
+.ledger-table thead th:last-child {
+    border-top-right-radius: var(--radius);
+}
+
+.ledger-table tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.15s ease;
+}
+
+.ledger-table tbody tr:nth-child(even) {
+    background: rgba(15, 81, 50, 0.03);
+}
+
+.ledger-table tbody tr:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.ledger-table td {
+    padding: 12px 14px;
+    color: var(--ink);
+    vertical-align: middle;
+}
+
+.ledger-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: var(--radius);
+}
+
+.ledger-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: var(--radius);
+}
+
+.ledger-table .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.ledger-table .status-unpaid {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.ledger-table .status-partial {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.ledger-table .status-paid {
+    background: #e4f7f0;
+    color: var(--green);
+}
+
+.ledger-table .amount {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.ledger-table .amount-due {
+    color: #dc2626;
+}
+
+.ledger-table .amount-paid {
+    color: var(--green);
+}
+
+.ledger-table .balance {
+    font-weight: 700;
+}
+
+/* ===== Student List with Balance ===== */
+.student-balance-list {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.student-balance-list thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.student-balance-list tbody tr {
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.student-balance-list tbody tr:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.student-balance-list tbody tr.selected {
+    background: rgba(5, 150, 105, 0.12);
+}
+
+.student-balance-list td {
+    padding: 12px 14px;
+    color: var(--ink);
+}
+
+.student-balance-list .balance {
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    text-align: right;
+}
+
+.student-balance-list .balance.positive {
+    color: #dc2626;
+}
+
+.student-balance-list .balance.zero {
+    color: var(--green);
+}
+
+/* ===== Section Cards / Grouped Lists ===== */
+.section-group {
+    margin-bottom: 20px;
+}
+
+.section-group h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--green);
+}
+
+.section-group .data-table {
+    width: 100%;
+}
+
+/* ===== Balance Summary for Student Portal ===== */
+.student-balance-summary {
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.12), rgba(5, 150, 105, 0.04));
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.student-balance-summary .summary-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.student-balance-summary .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(15, 81, 50, 0.1);
+}
+
+.student-balance-summary .summary-row:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--navy);
+}
+
+.student-balance-summary .summary-label {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.student-balance-summary .summary-value {
+    font-family: ui-monospace, monospace;
+    font-weight: 600;
+}
+
+.student-balance-summary .summary-value.due {
+    color: #dc2626;
+}
+
+.student-balance-summary .summary-value.paid {
+    color: var(--green);
+}
+
+.student-balance-summary .summary-value.balance {
+    color: var(--ink);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+    .data-table,
+    .ledger-table,
+    .student-balance-list {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .balance-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .search-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-bar .form-field {
+        min-width: 0;
+    }
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--muted);
+    background: #f8faf9;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 14px;
+}

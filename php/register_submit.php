@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/db_connect.php';
 
+$pdo = db_connect();
+
 session_start([
     'cookie_httponly' => true,
     'cookie_samesite' => 'Lax',

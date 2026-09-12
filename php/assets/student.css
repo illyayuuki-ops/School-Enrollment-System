@@ -1,0 +1,293 @@
+/* Student Portal Stylesheet
+ * Loaded only on student pages via $extraStyles in header.php
+ * Uses SMA CSS variables from app.css: --navy, --green, --line, --ink, --muted, --radius, --shadow
+ */
+
+/* ===== Data Table ===== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.data-table thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.data-table thead th:first-child {
+    border-top-left-radius: var(--radius);
+}
+
+.data-table thead th:last-child {
+    border-top-right-radius: var(--radius);
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.15s ease;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background: rgba(15, 81, 50, 0.03);
+}
+
+.data-table tbody tr:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.data-table td {
+    padding: 12px 14px;
+    color: var(--ink);
+    vertical-align: middle;
+}
+
+.data-table td:first-child {
+    padding-left: 14px;
+}
+
+.data-table td:last-child {
+    padding-right: 14px;
+}
+
+.data-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: var(--radius);
+}
+
+.data-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: var(--radius);
+}
+
+/* ===== Step List ===== */
+.step-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.step-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    position: relative;
+}
+
+.step-item.completed {
+    border-left: 4px solid var(--green);
+}
+
+.step-item.current {
+    border-left: 4px solid var(--blue);
+    background: #f0f5ff;
+}
+
+.step-item.pending {
+    opacity: 0.7;
+}
+
+.step-number {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.step-item.completed .step-number {
+    background: var(--green);
+}
+
+.step-item.current .step-number {
+    background: var(--blue);
+}
+
+.step-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.step-content strong {
+    font-size: 14px;
+    color: var(--ink);
+}
+
+.step-content span {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.step-status {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: 2px 8px;
+    border-radius: 20px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.step-item.completed .step-status {
+    background: #e4f7f0;
+    color: var(--green);
+}
+
+.step-item.current .step-status {
+    background: #e4f0ff;
+    color: var(--blue);
+}
+
+.step-item.pending .step-status {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+/* ===== Detail Grid ===== */
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.detail-field {
+    display: grid;
+    gap: 4px;
+}
+
+.detail-field label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.detail-field .value {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+}
+
+/* ===== Detail Section ===== */
+.detail-section {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.detail-section h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--muted);
+    background: #f8faf9;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* ===== Student Balance Summary ===== */
+.student-balance-summary {
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.12), rgba(5, 150, 105, 0.04));
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.student-balance-summary .summary-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.student-balance-summary .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(15, 81, 50, 0.1);
+}
+
+.student-balance-summary .summary-row:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--navy);
+}
+
+.student-balance-summary .summary-label {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.student-balance-summary .summary-value {
+    font-family: ui-monospace, monospace;
+    font-weight: 600;
+}
+
+.student-balance-summary .summary-value.due {
+    color: #dc2626;
+}
+
+.student-balance-summary .summary-value.paid {
+    color: var(--green);
+}
+
+.student-balance-summary .summary-value.balance {
+    color: var(--ink);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .step-item {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+}

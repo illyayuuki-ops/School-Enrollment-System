@@ -7,36 +7,36 @@ $roleHome = $role === 'guest'
     : (function_exists('home_for_role') ? home_for_role($role) : "/$role/home.php");
 $navigation = [
     'admin' => [
-        ['label' => 'Overview', 'href' => $roleHome],
-        ['label' => 'System logs', 'href' => '/admin/logs.php'],
-        ['label' => 'User accounts', 'href' => '/admin/users.php'],
-        ['label' => 'Global settings', 'href' => '/admin/settings.php'],
+        ['label' => 'Dashboard', 'href' => $roleHome],
+        ['label' => 'System Logs', 'href' => '/admin/logs.php'],
+        ['label' => 'User Accounts', 'href' => '/admin/users.php'],
+        ['label' => 'Global Settings', 'href' => '/admin/settings.php'],
     ],
     'admission' => [
-        ['label' => 'Overview', 'href' => $roleHome],
-        ['label' => 'Verification queue', 'href' => '/admission/queue.php'],
-        ['label' => 'Document review', 'href' => '/admission/documents.php'],
+        ['label' => 'Dashboard', 'href' => $roleHome],
+        ['label' => 'Verification Queue', 'href' => '/admission/queue.php'],
+        ['label' => 'Document Review', 'href' => '/admission/documents.php'],
     ],
     'registrar' => [
-        ['label' => 'Overview', 'href' => $roleHome],
-        ['label' => 'Student masterlist', 'href' => '/registrar/students.php'],
+        ['label' => 'Dashboard', 'href' => $roleHome],
+        ['label' => 'Student Masterlist', 'href' => '/registrar/students.php'],
         ['label' => 'Sectioning', 'href' => '/registrar/sections.php'],
-        ['label' => 'Subject allocation', 'href' => '/registrar/subjects.php'],
+        ['label' => 'Subject Allocation', 'href' => '/registrar/subjects.php'],
         ['label' => 'Payments / Assessment', 'href' => '/registrar/payments.php'],
     ],
     'teacher' => [
-        ['label' => 'Overview', 'href' => $roleHome],
-        ['label' => 'Active classes', 'href' => '/teacher/classes.php'],
-        ['label' => 'Grade encoding', 'href' => '/teacher/grades.php'],
-        ['label' => 'Schedule matrix', 'href' => '/teacher/schedule.php'],
+        ['label' => 'Dashboard', 'href' => $roleHome],
+        ['label' => 'Active Classes', 'href' => '/teacher/classes.php'],
+        ['label' => 'Grade Encoding', 'href' => '/teacher/grades.php'],
+        ['label' => 'Schedule Matrix', 'href' => '/teacher/schedule.php'],
     ],
     'student' => [
-        ['label' => 'Overview', 'href' => $roleHome],
-        ['label' => 'Enrollment wizard', 'href' => '/student/enrollment.php'],
-        ['label' => 'Study load', 'href' => '/student/load.php'],
-        ['label' => 'Application status', 'href' => '/student/status.php'],
+        ['label' => 'Dashboard', 'href' => $roleHome],
+        ['label' => 'Enrollment', 'href' => '/student/enrollment.php'],
+        ['label' => 'Study Load', 'href' => '/student/load.php'],
+        ['label' => 'Application Status', 'href' => '/student/status.php'],
     ],
-][$role] ?? [['label' => 'Sign in', 'href' => '/login/student.php']];
+][$role] ?? [['label' => 'Sign In', 'href' => '/login/student.php']];
 ?>
 <aside class="sidebar">
     <a class="brand" href="<?= htmlspecialchars($roleHome, ENT_QUOTES, 'UTF-8') ?>" aria-label="Steiner Maris Academy SMA Portal">

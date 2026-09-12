@@ -1,5 +1,6 @@
     </main>
 </div>
+<?php require_once __DIR__ . '/logout_modal.php'; ?>
 <script>
 (function () {
   var IDLE_LIMIT_MS = 10 * 60 * 1000;

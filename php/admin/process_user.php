@@ -129,6 +129,144 @@ try {
             header('Location: /admin/users.php?error=Database+error');
             exit;
         }
+    } elseif ($action === 'reset_password') {
+        $id = (int) ($_POST['id'] ?? 0);
+        if (!$id) {
+            header('Location: /admin/users.php?error=invalid_id');
+            exit;
+        }
+
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("SELECT email FROM users WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+            $user = $stmt->fetch();
+
+            if (!$user) {
+                $pdo->rollBack();
+                header('Location: /admin/users.php?error=user_not_found');
+                exit;
+            }
+
+            // Guard: admin cannot reset their own password
+            if ($id === (int) $_SESSION['user']['id']) {
+                $pdo->rollBack();
+                header('Location: /admin/users.php?error=cannot_reset_own_password');
+                exit;
+            }
+
+            $newPassword = bin2hex(random_bytes(8));
+            $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+            $stmt = $pdo->prepare("UPDATE users SET password_hash = :phash WHERE id = :id");
+            $stmt->execute(['phash' => $passwordHash, 'id' => $id]);
+
+            $stmt = $pdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'password_reset', :detail, NOW())");
+            $detail = "Reset password for user {$user['email']} (ID {$id})";
+            $stmt->execute(['actor' => $_SESSION['user']['id'], 'detail' => $detail]);
+
+            $pdo->commit();
+            header('Location: /admin/users.php?success=Password+reset&new_password=' . urlencode($newPassword));
+            exit;
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            header('Location: /admin/users.php?error=Database+error');
+            exit;
+        }
+    } elseif ($action === 'delete') {
+        $id = (int) ($_POST['id'] ?? 0);
+        if (!$id) {
+            header('Location: /admin/users.php?error=invalid_id');
+            exit;
+        }
+
+        // Guard: admin cannot delete themselves
+        if ($id === (int) $_SESSION['user']['id']) {
+            header('Location: /admin/users.php?error=cannot_delete_self');
+            exit;
+        }
+
+        // Guard: prevent deleting the last admin
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+        $stmt->execute();
+        $adminCount = (int) $stmt->fetchColumn();
+
+        $stmt = $pdo->prepare("SELECT role FROM users WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $targetUser = $stmt->fetch();
+
+        if ($targetUser && $targetUser['role'] === 'admin' && $adminCount <= 1) {
+            header('Location: /admin/users.php?error=cannot_delete_last_admin');
+            exit;
+        }
+
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("SELECT email FROM users WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+            $user = $stmt->fetch();
+
+            if (!$user) {
+                $pdo->rollBack();
+                header('Location: /admin/users.php?error=user_not_found');
+                exit;
+            }
+
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+
+            $stmt = $pdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'user_deleted', :detail, NOW())");
+            $detail = "Deleted user {$user['email']} (ID {$id})";
+            $stmt->execute(['actor' => $_SESSION['user']['id'], 'detail' => $detail]);
+
+            $pdo->commit();
+            header('Location: /admin/users.php?success=User+deleted+successfully');
+            exit;
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            header('Location: /admin/users.php?error=Database+error');
+            exit;
+        }
+    } elseif ($action === 'force_activate') {
+        $id = (int) ($_POST['id'] ?? 0);
+        if (!$id) {
+            header('Location: /admin/users.php?error=invalid_id');
+            exit;
+        }
+
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("SELECT email, activated FROM users WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+            $user = $stmt->fetch();
+
+            if (!$user) {
+                $pdo->rollBack();
+                header('Location: /admin/users.php?error=user_not_found');
+                exit;
+            }
+
+            if ($user['activated']) {
+                $pdo->rollBack();
+                header('Location: /admin/users.php?success=User+already+activated');
+                exit;
+            }
+
+            $stmt = $pdo->prepare("UPDATE users SET activated = TRUE WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+
+            $stmt = $pdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'user_force_activated', :detail, NOW())");
+            $detail = "Force activated user {$user['email']} (ID {$id})";
+            $stmt->execute(['actor' => $_SESSION['user']['id'], 'detail' => $detail]);
+
+            $pdo->commit();
+            header('Location: /admin/users.php?success=User+activated+successfully');
+            exit;
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            header('Location: /admin/users.php?error=Database+error');
+            exit;
+        }
     }
 
     header('Location: /admin/users.php?error=unknown_action');

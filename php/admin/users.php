@@ -74,6 +74,7 @@ try {
 
 $success = $_GET['success'] ?? '';
 $error = $_GET['error'] ?? '';
+$newPassword = $_GET['new_password'] ?? '';
 
 $pageTitle = 'User Accounts';
 $extraStyles = ['/assets/admin.css'];
@@ -83,8 +84,8 @@ require dirname(__DIR__) . '/includes/header.php';
     <?php require dirname(__DIR__) . '/includes/sidebar.php'; ?>
     <main class="main-content">
         <header class="topbar">
-            <div><span class="eyebrow">Administrator workspace</span><h1>Good morning, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="/logout.php" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div><span class="eyebrow">Administrator workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
+            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="content-grid">
             <article class="panel panel-wide">
@@ -92,6 +93,12 @@ require dirname(__DIR__) . '/includes/header.php';
 
                 <?php if ($success): ?>
                     <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+                <?php endif; ?>
+                <?php if ($newPassword): ?>
+                    <div class="alert alert-success" style="margin-top: 12px;">
+                        <strong>New temporary password:</strong> <code><?= htmlspecialchars($newPassword) ?></code>
+                        <p style="margin: 8px 0 0; font-size: 12px; color: var(--muted);">Share this password with the user. They will be prompted to change it on first login.</p>
+                    </div>
                 <?php endif; ?>
                 <?php if ($error): ?>
                     <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
@@ -206,12 +213,30 @@ require dirname(__DIR__) . '/includes/header.php';
                                             <div class="action-buttons">
                                                 <button type="button" class="btn-edit" onclick="openEditModal(<?= (int) $u['id'] ?>, '<?= htmlspecialchars($u['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['full_name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['role'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['status'], ENT_QUOTES) ?>')" style="padding: 4px 10px; font-size: 11px;">Edit</button>
                                                 <form method="post" action="/admin/process_user.php" style="display: inline;">
+                                                    <input type="hidden" name="action" value="reset_password">
+                                                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <button type="submit" class="btn-edit" onclick="return confirm('Reset password for this user? A new temporary password will be generated.');" style="padding: 4px 10px; font-size: 11px;">Reset Password</button>
+                                                </form>
+                                                <form method="post" action="/admin/process_user.php" style="display: inline;">
+                                                    <input type="hidden" name="action" value="force_activate">
+                                                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <button type="submit" class="btn-edit" style="padding: 4px 10px; font-size: 11px;" onclick="return confirm('Force activate this user account?');">Activate</button>
+                                                </form>
+                                                <form method="post" action="/admin/process_user.php" style="display: inline;">
                                                     <input type="hidden" name="action" value="toggle_status">
                                                     <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
                                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
                                                     <button type="submit" class="<?= $u['status'] === 'active' ? 'btn-suspend' : 'btn-reactivate' ?>" onclick="return confirm('Are you sure you want to <?= $u['status'] === 'active' ? 'suspend' : 'reactivate' ?> this user?');" style="padding: 4px 10px; font-size: 11px;">
                                                         <?= $u['status'] === 'active' ? 'Suspend' : 'Reactivate' ?>
                                                     </button>
+                                                </form>
+                                                <form method="post" action="/admin/process_user.php" style="display: inline;">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <button type="submit" class="btn-suspend" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');" style="padding: 4px 10px; font-size: 11px;">Delete</button>
                                                 </form>
                                             </div>
                                         </td>

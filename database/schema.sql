@@ -75,6 +75,9 @@ CREATE TABLE IF NOT EXISTS users (
     role user_role NOT NULL,
     status user_status NOT NULL DEFAULT 'active',
     activated BOOLEAN NOT NULL DEFAULT TRUE,
+    school_email VARCHAR(255) NULL,
+    level_type VARCHAR(20) NULL CHECK (level_type IN ('BED', 'College', 'TESDA')),
+    active_this_year BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -106,7 +109,8 @@ CREATE TABLE IF NOT EXISTS classes_and_schedules (
     schedule_grid TEXT NOT NULL,
     room VARCHAR(80) NOT NULL,
     capacity INTEGER NOT NULL,
-    enrolled_count INTEGER NOT NULL DEFAULT 0
+    enrolled_count INTEGER NOT NULL DEFAULT 0,
+    adviser_section VARCHAR(40) NULL
 );
 
 DO $$ BEGIN
@@ -296,6 +300,17 @@ INSERT INTO students (user_id, student_number, enrollment_status, academic_year,
 SELECT u.id, 'TEST-STU-001', 'enrolled', '2026-2027', 'General', '1st Year'
 FROM users u WHERE u.email = 'test-student@sma.test'
 ON CONFLICT (student_number) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS teacher_attendance (
+    id SERIAL PRIMARY KEY,
+    teacher_id INTEGER NOT NULL REFERENCES users(id),
+    work_date DATE NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'present' CHECK (status IN ('present', 'absent', 'late', 'leave')),
+    remarks VARCHAR(200) NULL,
+    recorded_by INTEGER REFERENCES users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (teacher_id, work_date)
+);
 
 CREATE TABLE IF NOT EXISTS email_otps (
     id SERIAL PRIMARY KEY,

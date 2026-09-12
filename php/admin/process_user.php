@@ -25,9 +25,13 @@ try {
         $fullName = trim((string) ($_POST['full_name'] ?? ''));
         $role = (string) ($_POST['role'] ?? '');
         $password = (string) ($_POST['password'] ?? '');
+        $schoolEmail = trim((string) ($_POST['school_email'] ?? ''));
+        $levelType = (string) ($_POST['level_type'] ?? '');
+        $activeThisYear = isset($_POST['active_this_year']) ? '1' : '0';
 
         $allowedRoles = ['admin', 'admission', 'registrar', 'teacher', 'student'];
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $fullName === '' || !in_array($role, $allowedRoles, true)) {
+        $allowedLevelTypes = ['BED', 'College', 'TESDA', ''];
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $fullName === '' || !in_array($role, $allowedRoles, true) || !in_array($levelType, $allowedLevelTypes, true)) {
             header('Location: /admin/users.php?error=validation');
             exit;
         }
@@ -39,8 +43,8 @@ try {
 
         $pdo->beginTransaction();
         try {
-            $stmt = $pdo->prepare("INSERT INTO users (email, password_hash, full_name, role, status, created_at) VALUES (:email, :phash, :fname, :role, 'active', NOW()) RETURNING id");
-            $stmt->execute(['email' => $email, 'phash' => $passwordHash, 'fname' => $fullName, 'role' => $role]);
+            $stmt = $pdo->prepare("INSERT INTO users (email, password_hash, full_name, role, status, school_email, level_type, active_this_year, created_at) VALUES (:email, :phash, :fname, :role, 'active', :school_email, :level_type, :active_this_year, NOW()) RETURNING id");
+            $stmt->execute(['email' => $email, 'phash' => $passwordHash, 'fname' => $fullName, 'role' => $role, 'school_email' => $schoolEmail, 'level_type' => $levelType, 'active_this_year' => $activeThisYear]);
             $newUserId = $stmt->fetchColumn();
 
             // Log the creation
@@ -66,19 +70,23 @@ try {
         $fullName = trim((string) ($_POST['full_name'] ?? ''));
         $role = (string) ($_POST['role'] ?? '');
         $status = (string) ($_POST['status'] ?? '');
+        $schoolEmail = trim((string) ($_POST['school_email'] ?? ''));
+        $levelType = (string) ($_POST['level_type'] ?? '');
+        $activeThisYear = isset($_POST['active_this_year']) ? '1' : '0';
 
         $allowedRoles = ['admin', 'admission', 'registrar', 'teacher', 'student'];
         $allowedStatuses = ['active', 'suspended'];
+        $allowedLevelTypes = ['BED', 'College', 'TESDA', ''];
 
-        if (!$id || !filter_var($email, FILTER_VALIDATE_EMAIL) || $fullName === '' || !in_array($role, $allowedRoles, true) || !in_array($status, $allowedStatuses, true)) {
+        if (!$id || !filter_var($email, FILTER_VALIDATE_EMAIL) || $fullName === '' || !in_array($role, $allowedRoles, true) || !in_array($status, $allowedStatuses, true) || !in_array($levelType, $allowedLevelTypes, true)) {
             header('Location: /admin/users.php?error=validation');
             exit;
         }
 
         $pdo->beginTransaction();
         try {
-            $stmt = $pdo->prepare("UPDATE users SET email = :email, full_name = :fname, role = :role, status = :status WHERE id = :id");
-            $stmt->execute(['email' => $email, 'fname' => $fullName, 'role' => $role, 'status' => $status, 'id' => $id]);
+            $stmt = $pdo->prepare("UPDATE users SET email = :email, full_name = :fname, role = :role, status = :status, school_email = :school_email, level_type = :level_type, active_this_year = :active_this_year WHERE id = :id");
+            $stmt->execute(['email' => $email, 'fname' => $fullName, 'role' => $role, 'status' => $status, 'school_email' => $schoolEmail, 'level_type' => $levelType, 'active_this_year' => $activeThisYear, 'id' => $id]);
 
             if ($stmt->rowCount() > 0) {
                 $stmt = $pdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'user_edited', :detail, NOW())");

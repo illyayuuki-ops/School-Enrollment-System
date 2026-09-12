@@ -49,11 +49,11 @@ require dirname(__DIR__) . '/includes/header.php';
             <article class="metric-card"><span class="eyebrow">Enrolled students</span><strong><?= number_format($enrolledStudents) ?></strong><small>Total: <?= number_format($totalStudents) ?></small></article>
             <article class="metric-card"><span class="eyebrow">Students with balance</span><strong><?= number_format($outstandingStudents) ?></strong><small>Of <?= number_format($totalStudents) ?> total</small></article>
             <article class="metric-card"><span class="eyebrow">Graduation candidates</span><strong>—</strong><small>data not available</small></article>
-            <article class="metric-card accent-card"><span class="eyebrow">Total outstanding</span><strong>₱<?= number_format($totalOutstanding, 2) ?></strong><small>Across all students</small><div class="progress"><span style="width:0%"></span></div></article>
+            <article class="metric-card accent-card"><span class="eyebrow">Total outstanding</span><strong>₱<?= number_format($totalOutstanding, 2) ?></strong></article>
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">
-                <div class="panel-heading"><div><span class="eyebrow">Quick Actions</span><h2>Records Management</h2></div></div>
+                <div class="panel-heading"><div><span class="eyebrow">Quick actions</span><h2>Records Management</h2></div></div>
                 <div class="action-list">
                     <a href="/registrar/students.php"><span class="action-icon blue">01</span><span><strong>Student Masterlist</strong><small>Search and manage records</small></span><span class="arrow">↗</span></a>
                     <a href="/registrar/sections.php"><span class="action-icon green">02</span><span><strong>Sectioning</strong><small>Assign students to sections</small></span><span class="arrow">↗</span></a>

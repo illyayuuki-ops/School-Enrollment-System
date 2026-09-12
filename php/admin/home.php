@@ -43,11 +43,11 @@ require dirname(__DIR__) . '/includes/header.php';
             <article class="metric-card"><span class="eyebrow">Total users</span><strong><?= number_format($totalUsers) ?></strong><small>Across all roles</small></article>
             <article class="metric-card"><span class="eyebrow">Administrators</span><strong><?= number_format($roleCounts['admin']) ?></strong><small><?= number_format($roleCounts['admission']) ?> Admissions</small></article>
             <article class="metric-card"><span class="eyebrow">Registrars</span><strong><?= number_format($roleCounts['registrar']) ?></strong><small><?= number_format($roleCounts['teacher']) ?> Teachers</small></article>
-            <article class="metric-card accent-card"><span class="eyebrow">Students</span><strong><?= number_format($roleCounts['student']) ?></strong><small>Enrolled users</small><div class="progress"><span style="width:<?= $totalUsers > 0 ? min(100, ($roleCounts['student'] / $totalUsers) * 100) : 0 ?>%"></span></div></article>
+            <article class="metric-card accent-card"><span class="eyebrow">Students</span><strong><?= number_format($roleCounts['student']) ?></strong><small>Enrolled users</small></article>
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">
-                <div class="panel-heading"><div><span class="eyebrow">Quick actions</span><h2>Manage the academy</h2></div></div>
+                <div class="panel-heading"><div><span class="eyebrow">Quick actions</span><h2>User management</h2></div></div>
                 <div class="action-list">
                     <a href="/admin/users.php"><span class="action-icon blue">01</span><span><strong>User accounts</strong><small>Create, edit, suspend accounts</small></span><span class="arrow">↗</span></a>
                     <a href="/admin/logs.php"><span class="action-icon green">02</span><span><strong>System logs</strong><small>Review activity and errors</small></span><span class="arrow">↗</span></a>

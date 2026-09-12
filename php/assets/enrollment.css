@@ -122,6 +122,15 @@
 .enrollment-form .portal-content-inner {
     width: 100%;
 }
+
+/* Force single-column layout for register page */
+.login-page .portal-content-inner {
+    display: block !important;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0;
+}
+
 @media (max-width: 560px) {
     .enrollment-form .form-grid {
         grid-template-columns: 1fr;

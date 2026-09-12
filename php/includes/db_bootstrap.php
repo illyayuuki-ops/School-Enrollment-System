@@ -41,7 +41,8 @@ function ensure_schema(PDO $pdo): void
                 || stripos($msg, 'duplicate') !== false
                 || $state === '42710'  // duplicate_object
                 || $state === '23505'  // unique_violation
-                || $state === '42P10'; // invalid ON CONFLICT specification (no unique constraint)
+                || $state === '42P10'  // invalid ON CONFLICT specification (no unique constraint)
+                || $state === '42P07'; // duplicate_table
             
             if ($isIdempotentError) {
                 continue;

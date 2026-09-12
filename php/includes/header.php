@@ -13,6 +13,7 @@ $extraStyles = $extraStyles ?? [];
     <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?> · SMA</title>
     <link rel="icon" type="image/png" href="/assets/logo.png">
     <link rel="stylesheet" href="/assets/app.css">
+    <link rel="stylesheet" href="/assets/components.css">
     <?php foreach ($extraStyles as $style): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($style, ENT_QUOTES, 'UTF-8') ?>">
     <?php endforeach; ?>

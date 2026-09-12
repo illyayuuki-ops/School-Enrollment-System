@@ -3,65 +3,6 @@
  * Uses SMA CSS variables from app.css: --navy, --green, --line, --ink, --muted, --radius, --shadow
  */
 
-/* ===== Data Table ===== */
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-}
-
-.data-table thead th {
-    background: var(--navy);
-    color: #fff;
-    padding: 12px 14px;
-    text-align: left;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.data-table thead th:first-child {
-    border-top-left-radius: var(--radius);
-}
-
-.data-table thead th:last-child {
-    border-top-right-radius: var(--radius);
-}
-
-.data-table tbody tr {
-    border-bottom: 1px solid var(--line);
-    transition: background 0.15s ease;
-}
-
-.data-table tbody tr:nth-child(even) {
-    background: rgba(15, 81, 50, 0.03);
-}
-
-.data-table tbody tr:hover {
-    background: rgba(5, 150, 105, 0.06);
-}
-
-.data-table td {
-    padding: 12px 14px;
-    color: var(--ink);
-    vertical-align: middle;
-}
-
-.data-table td:first-child {
-    padding-left: 14px;
-}
-
-.data-table td:last-child {
-    padding-right: 14px;
-}
-
-.data-table tbody tr:last-child td:first-child {
-    border-bottom-left-radius: var(--radius);
-}
-
-.data-table tbody tr:last-child td:last-child {
-    border-bottom-right-radius: var(--radius);
-}
-
 /* ===== Search / Filter Bar ===== */
 .search-bar {
     display: flex;
@@ -386,34 +327,159 @@
     background: rgba(5, 150, 105, 0.06);
 }
 
-.logs-table td {
+.ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.ledger-table thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ledger-table thead th:first-child {
+    border-top-left-radius: var(--radius);
+}
+
+.ledger-table thead th:last-child {
+    border-top-right-radius: var(--radius);
+}
+
+.ledger-table tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.15s ease;
+}
+
+.ledger-table tbody tr:nth-child(even) {
+    background: rgba(15, 81, 50, 0.03);
+}
+
+.ledger-table tbody tr:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.ledger-table tbody tr.ledger-status-paid {
+    background: linear-gradient(90deg, rgba(5, 150, 105, 0.08), transparent);
+}
+
+.ledger-table tbody tr.ledger-status-partial {
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.08), transparent);
+}
+
+.ledger-table tbody tr.ledger-status-unpaid {
+    background: linear-gradient(90deg, rgba(220, 38, 38, 0.08), transparent);
+}
+
+.ledger-table td {
     padding: 12px 14px;
     color: var(--ink);
     vertical-align: middle;
 }
 
-.logs-table tbody tr:last-child td:first-child {
+.ledger-table tbody tr:last-child td:first-child {
     border-bottom-left-radius: var(--radius);
 }
 
-.logs-table tbody tr:last-child td:last-child {
+.ledger-table tbody tr:last-child td:last-child {
     border-bottom-right-radius: var(--radius);
 }
 
-.logs-table .action-cell {
-    font-family: ui-monospace, monospace;
+.ledger-table .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.ledger-table .status-unpaid {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.ledger-table .status-partial {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.ledger-table .status-paid {
+    background: #e4f7f0;
     color: var(--green);
 }
 
-.logs-table .detail-cell {
-    color: var(--muted);
-    font-size: 12px;
-    max-width: 400px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.ledger-table .amount {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    text-align: right;
     white-space: nowrap;
+}
+
+.ledger-table .amount-due {
+    color: #dc2626;
+}
+
+.ledger-table .amount-paid {
+    color: var(--green);
+}
+
+.ledger-table .balance {
+    font-weight: 700;
+}
+
+/* ===== Student Balance List ===== */
+.student-balance-list {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.student-balance-list thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.student-balance-list tbody tr {
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.student-balance-list tbody tr:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.student-balance-list tbody tr.selected {
+    background: rgba(5, 150, 105, 0.12);
+}
+
+.student-balance-list td {
+    padding: 12px 14px;
+    color: var(--ink);
+}
+
+.student-balance-list .balance {
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    text-align: right;
+}
+
+.student-balance-list .balance.positive {
+    color: #dc2626;
+}
+
+.student-balance-list .balance.zero {
+    color: var(--green);
 }
 
 /* ===== User Form ===== */

@@ -13,6 +13,9 @@ $settings = [
     'academic_year' => '2026-2027',
     'school_name' => 'Steiner Maris Academy',
     'registration_open' => '1',
+    'level_active_BED' => '1',
+    'level_active_College' => '1',
+    'level_active_TESDA' => '1',
 ];
 
 try {
@@ -36,6 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $academicYear = trim((string) ($_POST['academic_year'] ?? ''));
     $schoolName = trim((string) ($_POST['school_name'] ?? ''));
     $registrationOpen = isset($_POST['registration_open']) ? '1' : '0';
+    $levelActiveBED = isset($_POST['level_active_BED']) ? '1' : '0';
+    $levelActiveCollege = isset($_POST['level_active_College']) ? '1' : '0';
+    $levelActiveTESDA = isset($_POST['level_active_TESDA']) ? '1' : '0';
 
     if ($academicYear === '' || $schoolName === '') {
         header('Location: /admin/settings.php?error=validation');
@@ -50,6 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $oldAcademicYear = $settings['academic_year'];
         $oldSchoolName = $settings['school_name'];
         $oldRegistrationOpen = $settings['registration_open'];
+        $oldLevelActiveBED = $settings['level_active_BED'];
+        $oldLevelActiveCollege = $settings['level_active_College'];
+        $oldLevelActiveTESDA = $settings['level_active_TESDA'];
 
         $changes = [];
         if ($academicYear !== $oldAcademicYear) {
@@ -61,10 +70,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($registrationOpen !== $oldRegistrationOpen) {
             $changes[] = "registration_open: " . ($oldRegistrationOpen ? 'enabled' : 'disabled') . " → " . ($registrationOpen ? 'enabled' : 'disabled');
         }
+        if ($levelActiveBED !== $oldLevelActiveBED) {
+            $changes[] = "level_active_BED: " . ($oldLevelActiveBED ? 'enabled' : 'disabled') . " → " . ($levelActiveBED ? 'enabled' : 'disabled');
+        }
+        if ($levelActiveCollege !== $oldLevelActiveCollege) {
+            $changes[] = "level_active_College: " . ($oldLevelActiveCollege ? 'enabled' : 'disabled') . " → " . ($levelActiveCollege ? 'enabled' : 'disabled');
+        }
+        if ($levelActiveTESDA !== $oldLevelActiveTESDA) {
+            $changes[] = "level_active_TESDA: " . ($oldLevelActiveTESDA ? 'enabled' : 'disabled') . " → " . ($levelActiveTESDA ? 'enabled' : 'disabled');
+        }
 
         $stmt->execute(['key' => 'academic_year', 'value' => $academicYear]);
         $stmt->execute(['key' => 'school_name', 'value' => $schoolName]);
         $stmt->execute(['key' => 'registration_open', 'value' => $registrationOpen]);
+        $stmt->execute(['key' => 'level_active_BED', 'value' => $levelActiveBED]);
+        $stmt->execute(['key' => 'level_active_College', 'value' => $levelActiveCollege]);
+        $stmt->execute(['key' => 'level_active_TESDA', 'value' => $levelActiveTESDA]);
 
         if (!empty($changes)) {
             $stmt = $pdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'settings_changed', :detail, NOW())");
@@ -125,6 +146,43 @@ require dirname(__DIR__) . '/includes/header.php';
                         </div>
                     </div>
 
+                    <div style="margin-top: 24px; padding: 16px; background: #f8faf9; border: 1px solid var(--line); border-radius: var(--radius);">
+                        <h4 style="margin: 0 0 16px; font-size: 13px; font-weight: 700; color: var(--navy);">Level Activation (Active This School Year)</h4>
+                        <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                            <div class="form-field" style="align-items: flex-start;">
+                                <label for="level_active_BED">BED (Basic Education)</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="level_active_BED" name="level_active_BED" value="1" <?= $settings['level_active_BED'] === '1' ? 'checked' : '' ?>>
+                                    <label for="level_active_BED" style="margin: 0; font-weight: 500; font-size: 13px;">Active this school year</label>
+                                </div>
+                            </div>
+                            <div class="form-field" style="align-items: flex-start;">
+                                <label for="level_active_College">College</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="level_active_College" name="level_active_College" value="1" <?= $settings['level_active_College'] === '1' ? 'checked' : '' ?>>
+                                    <label for="level_active_College" style="margin: 0; font-weight: 500; font-size: 13px;">Active this school year</label>
+                                </div>
+                            </div>
+                            <div class="form-field" style="align-items: flex-start;">
+                                <label for="level_active_TESDA">TESDA</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="level_active_TESDA" name="level_active_TESDA" value="1" <?= $settings['level_active_TESDA'] === '1' ? 'checked' : '' ?>>
+                                    <label for="level_active_TESDA" style="margin: 0; font-weight: 500; font-size: 13px;">Active this school year</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-field" style="align-items: flex-end;">
+                            <label for="registration_open">Registration Open</label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="registration_open" name="registration_open" value="1" <?= $settings['registration_open'] === '1' ? 'checked' : '' ?>>
+                                <label for="registration_open" style="margin: 0; font-weight: 500; font-size: 13px;">Enable public registration</label>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
                         <button type="submit" class="btn-save">Save Settings</button>
                     </div>
@@ -139,6 +197,12 @@ require dirname(__DIR__) . '/includes/header.php';
                         <dd style="margin: 0; font-weight: 600; color: var(--ink);"><?= htmlspecialchars($settings['school_name']) ?></dd>
                         <dt style="color: var(--muted); font-weight: 500;">Registration Open</dt>
                         <dd style="margin: 0; font-weight: 600; color: var(--ink);"><?= $settings['registration_open'] === '1' ? 'Yes' : 'No' ?></dd>
+                        <dt style="color: var(--muted); font-weight: 500;">BED Active</dt>
+                        <dd style="margin: 0; font-weight: 600; color: var(--ink);"><?= $settings['level_active_BED'] === '1' ? 'Yes' : 'No' ?></dd>
+                        <dt style="color: var(--muted); font-weight: 500;">College Active</dt>
+                        <dd style="margin: 0; font-weight: 600; color: var(--ink);"><?= $settings['level_active_College'] === '1' ? 'Yes' : 'No' ?></dd>
+                        <dt style="color: var(--muted); font-weight: 500;">TESDA Active</dt>
+                        <dd style="margin: 0; font-weight: 600; color: var(--ink);"><?= $settings['level_active_TESDA'] === '1' ? 'Yes' : 'No' ?></dd>
                     </dl>
                 </div>
             </article>

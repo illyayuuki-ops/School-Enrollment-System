@@ -55,7 +55,7 @@ if ($page > $totalPages) $page = $totalPages;
 $users = [];
 try {
     $stmt = $pdo->prepare("
-        SELECT u.id, u.email, u.full_name, u.role, u.status, u.created_at
+        SELECT u.id, u.email, u.full_name, u.role, u.status, u.school_email, u.level_type, u.active_this_year, u.created_at
         FROM users u
         {$where}
         ORDER BY u.created_at DESC
@@ -135,6 +135,26 @@ require dirname(__DIR__) . '/includes/header.php';
                                 <label for="password">Temporary Password *</label>
                                 <input type="password" id="password" name="password" required placeholder="Auto-generated if left blank" style="height: 40px;">
                             </div>
+                            <div class="form-field">
+                                <label for="school_email">School Email</label>
+                                <input type="email" id="school_email" name="school_email" placeholder="user@sma.edu.ph" style="height: 40px;">
+                            </div>
+                            <div class="form-field">
+                                <label for="level_type">Level Type</label>
+                                <select id="level_type" name="level_type" style="height: 40px;">
+                                    <option value="">-- Select Level Type --</option>
+                                    <option value="BED">BED</option>
+                                    <option value="College">College</option>
+                                    <option value="TESDA">TESDA</option>
+                                </select>
+                            </div>
+                            <div class="form-field" style="align-items: flex-end;">
+                                <label for="active_this_year">Active This Year</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="active_this_year" name="active_this_year" value="1" checked>
+                                    <label for="active_this_year" style="margin: 0; font-weight: 500; font-size: 13px;">Active this academic year</label>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="btn-create">Create User</button>
@@ -188,6 +208,9 @@ require dirname(__DIR__) . '/includes/header.php';
                                     <th>Full Name</th>
                                     <th>Role</th>
                                     <th>Status</th>
+                                    <th>School Email</th>
+                                    <th>Level Type</th>
+                                    <th>Active This Year</th>
                                     <th>Created</th>
                                     <th style="text-align: center;">Actions</th>
                                 </tr>
@@ -208,10 +231,17 @@ require dirname(__DIR__) . '/includes/header.php';
                                                 <?= htmlspecialchars(ucfirst($u['status'])) ?>
                                             </span>
                                         </td>
+                                        <td><?= htmlspecialchars($u['school_email'] ?? '—') ?></td>
+                                        <td><?= htmlspecialchars($u['level_type'] ?? '—') ?></td>
+                                        <td>
+                                            <span class="status-badge status-<?= $u['active_this_year'] ? 'paid' : 'unpaid' ?>" style="font-size: 11px; text-transform: capitalize;">
+                                                <?= $u['active_this_year'] ? 'Yes' : 'No' ?>
+                                            </span>
+                                        </td>
                                         <td><?= date('M d, Y', strtotime($u['created_at'])) ?></td>
                                         <td style="text-align: center;">
                                             <div class="action-buttons">
-                                                <button type="button" class="btn-edit" onclick="openEditModal(<?= (int) $u['id'] ?>, '<?= htmlspecialchars($u['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['full_name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['role'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['status'], ENT_QUOTES) ?>')" style="padding: 4px 10px; font-size: 11px;">Edit</button>
+                                                <button type="button" class="btn-edit" onclick="openEditModal(<?= (int) $u['id'] ?>, '<?= htmlspecialchars($u['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['full_name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['role'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['status'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['school_email'] ?? '', ENT_QUOTES) ?>', '<?= htmlspecialchars($u['level_type'] ?? '', ENT_QUOTES) ?>', '<?= $u['active_this_year'] ? '1' : '0' ?>')" style="padding: 4px 10px; font-size: 11px;">Edit</button>
                                                 <form method="post" action="/admin/process_user.php" style="display: inline;">
                                                     <input type="hidden" name="action" value="reset_password">
                                                     <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
@@ -298,6 +328,26 @@ require dirname(__DIR__) . '/includes/header.php';
                         <option value="suspended">Suspended</option>
                     </select>
                 </div>
+                <div class="form-field">
+                    <label for="edit_school_email">School Email</label>
+                    <input type="email" id="edit_school_email" name="school_email" placeholder="user@sma.edu.ph" style="height: 40px;">
+                </div>
+                <div class="form-field">
+                    <label for="edit_level_type">Level Type</label>
+                    <select id="edit_level_type" name="level_type" style="height: 40px;">
+                        <option value="">-- Select Level Type --</option>
+                        <option value="BED">BED</option>
+                        <option value="College">College</option>
+                        <option value="TESDA">TESDA</option>
+                    </select>
+                </div>
+                <div class="form-field" style="align-items: flex-end;">
+                    <label for="edit_active_this_year">Active This Year</label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="edit_active_this_year" name="active_this_year" value="1">
+                        <label for="edit_active_this_year" style="margin: 0; font-weight: 500; font-size: 13px;">Active this academic year</label>
+                    </div>
+                </div>
             </div>
             <div class="form-actions" style="margin-top: 16px; display: flex; gap: 12px; justify-content: flex-end;">
                 <button type="submit" class="btn-save">Save Changes</button>
@@ -308,12 +358,15 @@ require dirname(__DIR__) . '/includes/header.php';
 </div>
 
 <script>
-function openEditModal(id, email, fullName, role, status) {
+function openEditModal(id, email, fullName, role, status, schoolEmail, levelType, activeThisYear) {
     document.getElementById('edit_id').value = id;
     document.getElementById('edit_email').value = email;
     document.getElementById('edit_full_name').value = fullName;
     document.getElementById('edit_role').value = role;
     document.getElementById('edit_status').value = status;
+    document.getElementById('edit_school_email').value = schoolEmail || '';
+    document.getElementById('edit_level_type').value = levelType || '';
+    document.getElementById('edit_active_this_year').checked = activeThisYear === '1';
     document.getElementById('editModal').style.display = 'flex';
 }
 

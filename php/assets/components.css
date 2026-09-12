@@ -1,0 +1,494 @@
+/* Shared Components Stylesheet
+ * Loaded on all logged-in pages via $extraStyles in header.php
+ * Contains shared rules for .data-table, .form-field, .search-bar, .status-badge, etc.
+ * Uses SMA CSS variables from app.css: --navy, --green, --line, --ink, --muted, --radius, --shadow
+ */
+
+/* ===== Data Table (Shared) ===== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.data-table thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.data-table thead th:first-child {
+    border-top-left-radius: var(--radius);
+}
+
+.data-table thead th:last-child {
+    border-top-right-radius: var(--radius);
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.15s ease;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background: rgba(15, 81, 50, 0.03);
+}
+
+.data-table tbody tr:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.data-table td {
+    padding: 12px 14px;
+    color: var(--ink);
+    vertical-align: middle;
+}
+
+.data-table td:first-child {
+    padding-left: 14px;
+}
+
+.data-table td:last-child {
+    padding-right: 14px;
+}
+
+.data-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: var(--radius);
+}
+
+.data-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: var(--radius);
+}
+
+/* ===== Search / Filter Bar (Shared) ===== */
+.search-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.search-bar .form-field {
+    display: grid;
+    gap: 5px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-bar label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #40584d;
+}
+
+.search-bar input,
+.search-bar select {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #ccdcd5;
+    border-radius: 8px;
+    background: #fbfdfc;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.search-bar input:focus,
+.search-bar select:focus {
+    border-color: var(--green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    outline: none;
+}
+
+/* ===== Form Controls (Shared) ===== */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.form-field {
+    display: grid;
+    gap: 5px;
+}
+
+.form-field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #40584d;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #ccdcd5;
+    border-radius: 8px;
+    background: #fbfdfc;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    border-color: var(--green);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    outline: none;
+}
+
+/* ===== Status Badges (Shared) ===== */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.status-active {
+    background: #e4f7f0;
+    color: var(--green);
+}
+
+.status-suspended {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.status-pending {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.status-approved {
+    background: #e4f7f0;
+    color: var(--green);
+}
+
+.status-rejected {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.status-verified {
+    background: #e4f7f0;
+    color: var(--green);
+}
+
+/* ===== Empty State (Shared) ===== */
+.empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--muted);
+    background: #f8faf9;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* ===== Alert Styles (Shared) ===== */
+.alert {
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+.alert-success {
+    background: #e4f7f0;
+    color: var(--green);
+    border: 1px solid #b8e5d2;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+/* ===== Responsive (Shared) ===== */
+@media (max-width: 640px) {
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+/* ===== Dashboard Spacing (Shared) ===== */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.metric-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.metric-card .eyebrow {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.metric-card strong {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.metric-card small {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.metric-card.accent-card {
+    border-color: var(--green);
+}
+
+.metric-card .progress {
+    margin-top: 8px;
+    height: 6px;
+    background: var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.metric-card .progress span {
+    display: block;
+    height: 100%;
+    background: var(--green);
+    border-radius: 3px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.panel-wide {
+    grid-column: 1 / -1;
+}
+
+.panel-heading {
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.panel-heading .eyebrow {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.panel-heading h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0;
+}
+
+.panel > div:last-child {
+    padding: 16px;
+}
+
+.action-list {
+    display: grid;
+    gap: 12px;
+}
+
+.action-list a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #fbfdfc;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.action-list a:hover {
+    background: #f0f5f3;
+    border-color: var(--green);
+}
+
+.action-icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    background: var(--navy);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.action-list a:nth-child(2) .action-icon {
+    background: var(--green);
+}
+
+.action-list a:nth-child(3) .action-icon {
+    background: var(--amber);
+}
+
+.action-list a:nth-child(4) .action-icon {
+    background: var(--blue);
+}
+
+.action-list span {
+    flex: 1;
+    min-width: 0;
+}
+
+.action-list strong {
+    display: block;
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 2px;
+}
+
+.action-list small {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+}
+
+.arrow {
+    color: var(--muted);
+    font-size: 16px;
+}
+
+.activity-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.activity-list li {
+    display: flex;
+    gap: 12px;
+    padding: 10px;
+    background: #fbfdfc;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.activity-dot.green {
+    background: var(--green);
+}
+
+.activity-dot.blue {
+    background: var(--blue);
+}
+
+.activity-dot.amber {
+    background: var(--amber);
+}
+
+.activity-list strong {
+    font-size: 13px;
+    color: var(--ink);
+}
+
+.activity-list small {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+}
+
+.balance-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.balance-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+}
+
+.balance-card .card-label {
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.balance-card .card-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.balance-card .card-value.positive {
+    color: var(--green);
+}
+
+.balance-card .card-value.negative {
+    color: #dc2626;
+}
+
+.balance-card .card-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+}

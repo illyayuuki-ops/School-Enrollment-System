@@ -85,6 +85,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'approve') {
 
         $pdo->commit();
 
+        // Log the approval
+        try {
+            $stmt = $pdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'application_approved', :detail, NOW())");
+            $detail = "Approved application {$application['application_number']} ({$application['email']}) — student {$studentNumber} created with fee ₱" . number_format($feeAmount, 2);
+            $stmt->execute(['actor' => $_SESSION['user']['id'], 'detail' => $detail]);
+        } catch (PDOException $e) {
+            // Ignore logging errors
+        }
+
         // Success page with credentials
         $pageTitle = 'Application Approved';
         $extraStyles = ['/assets/admission.css'];
@@ -133,6 +142,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'approve') {
     try {
         $stmt = $pdo->prepare("UPDATE pre_registrations SET status = 'rejected' WHERE id = :id AND status = 'pending'");
         $stmt->execute(['id' => $appId]);
+
+        // Log the rejection
+        try {
+            $stmt = $pdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'application_rejected', :detail, NOW())");
+            $detail = "Rejected application {$application['application_number']} ({$application['email']})";
+            $stmt->execute(['actor' => $_SESSION['user']['id'], 'detail' => $detail]);
+        } catch (PDOException $e) {
+            // Ignore logging errors
+        }
+
         header('Location: /admission/queue.php?rejected=1');
         exit;
     } catch (PDOException $e) {

@@ -255,3 +255,21 @@ INSERT INTO student_ledgers (student_id, academic_year, description, amount_due,
     (2, '2026-2027', 'Tuition Fee - 1st Semester', 50000.00, 50000.00, 'paid'),
     (2, '2026-2027', 'Miscellaneous Fee', 3000.00, 3000.00, 'paid')
 ON CONFLICT DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS system_logs (
+    id SERIAL PRIMARY KEY,
+    actor_user_id INTEGER REFERENCES users(id),
+    action VARCHAR NOT NULL,
+    detail TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS app_settings (
+    key VARCHAR PRIMARY KEY,
+    value TEXT
+);
+INSERT INTO app_settings (key, value) VALUES
+    ('academic_year', '2026-2027'),
+    ('school_name', 'Steiner Maris Academy'),
+    ('registration_open', '1')
+ON CONFLICT (key) DO NOTHING;

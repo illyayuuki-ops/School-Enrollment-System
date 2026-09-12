@@ -2,7 +2,34 @@
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('admin');
+require_once dirname(__DIR__) . '/db_connect.php';
+
+$pdo = db_connect();
+
+$totalUsers = 0;
+$roleCounts = [
+    'admin' => 0,
+    'admission' => 0,
+    'registrar' => 0,
+    'teacher' => 0,
+    'student' => 0,
+];
+try {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users");
+    $stmt->execute();
+    $totalUsers = (int) $stmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT role, COUNT(*) as cnt FROM users GROUP BY role");
+    $stmt->execute();
+    foreach ($stmt->fetchAll() as $row) {
+        $roleCounts[$row['role']] = (int) $row['cnt'];
+    }
+} catch (PDOException $e) {
+    // Keep defaults on error
+}
+
 $pageTitle = 'Administrator Overview';
+$extraStyles = ['/assets/admin.css'];
 require dirname(__DIR__) . '/includes/header.php';
 ?>
 <div class="app-frame">
@@ -13,10 +40,10 @@ require dirname(__DIR__) . '/includes/header.php';
             <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="/logout.php" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="dashboard-grid">
-            <article class="metric-card"><span class="eyebrow">Total users</span><strong>1,284</strong><small><b class="trend-up">+8.4%</b> vs last month</small></article>
-            <article class="metric-card"><span class="eyebrow">Active sessions</span><strong>342</strong><small><b class="trend-up">+12%</b> today</small></article>
-            <article class="metric-card"><span class="eyebrow">System health</span><strong>99.9%</strong><small>All services nominal</small></article>
-            <article class="metric-card accent-card"><span class="eyebrow">Uptime</span><strong>99.98%</strong><small>Target <b>99.95%</b></small><div class="progress"><span style="width:99.98%"></span></div></article>
+            <article class="metric-card"><span class="eyebrow">Total users</span><strong><?= number_format($totalUsers) ?></strong><small>Across all roles</small></article>
+            <article class="metric-card"><span class="eyebrow">Administrators</span><strong><?= number_format($roleCounts['admin']) ?></strong><small><?= number_format($roleCounts['admission']) ?> Admissions</small></article>
+            <article class="metric-card"><span class="eyebrow">Registrars</span><strong><?= number_format($roleCounts['registrar']) ?></strong><small><?= number_format($roleCounts['teacher']) ?> Teachers</small></article>
+            <article class="metric-card accent-card"><span class="eyebrow">Students</span><strong><?= number_format($roleCounts['student']) ?></strong><small>Enrolled users</small><div class="progress"><span style="width:<?= $totalUsers > 0 ? min(100, ($roleCounts['student'] / $totalUsers) * 100) : 0 ?>%"></span></div></article>
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">
@@ -30,9 +57,7 @@ require dirname(__DIR__) . '/includes/header.php';
             <article class="panel">
                 <div class="panel-heading"><div><span class="eyebrow">Recent activity</span><h2>System events</h2></div></div>
                 <ul class="activity-list">
-                    <li><span class="activity-dot green"></span><span><strong>User created</strong><small>j.smith@sma.edu.ph · 15 min ago</small></span></li>
-                    <li><span class="activity-dot blue"></span><span><strong>Settings updated</strong><small>Academic year config · 1 hr ago</small></span></li>
-                    <li><span class="activity-dot amber"></span><span><strong>Backup completed</strong><small>Full database · 3 hrs ago</small></span></li>
+                    <li><span class="activity-dot green"></span><span><strong>System ready</strong><small>Admin portal initialized</small></span></li>
                 </ul>
             </article>
         </section>

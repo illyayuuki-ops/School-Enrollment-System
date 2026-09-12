@@ -59,5 +59,15 @@ $_SESSION['user'] = $user;
 $_SESSION['last_activity'] = time();
 unset($_SESSION['login_error'], $_SESSION['login_role'], $_SESSION['csrf_token']);
 
+// Log successful login
+try {
+    $logPdo = db_connect();
+    $stmt = $logPdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'login', :detail, NOW())");
+    $detail = "User {$user['email']} ({$user['role']}) logged in";
+    $stmt->execute(['actor' => $user['id'], 'detail' => $detail]);
+} catch (PDOException $e) {
+    // Ignore logging errors - never break the main flow
+}
+
 header('Location: ' . home_for_role($role));
 exit;

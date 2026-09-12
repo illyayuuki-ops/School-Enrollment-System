@@ -14,14 +14,20 @@ if (!$appId || !in_array($action, ['approve', 'reject'], true)) {
     exit;
 }
 
-// Verify CSRF for POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $csrfToken = (string) ($_POST['csrf_token'] ?? '');
-    if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
-        header('Location: /admission/queue.php?error=csrf');
-        exit;
-    }
+// Verify CSRF for all state-changing actions (both approve and reject)
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: /admission/queue.php');
+    exit;
 }
+
+$csrfToken = (string) ($_POST['csrf_token'] ?? '');
+if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
+    header('Location: /admission/queue.php?error=csrf');
+    exit;
+}
+
+// Consolidate application fee reading
+$feeAmount = max(0, (float) ($_POST['application_fee'] ?? 500.00));
 
 // Fetch application
 $application = null;
@@ -38,11 +44,8 @@ if (!$application) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'approve') {
+if ($action === 'approve') {
     // Process approval with application fee
-    $feeAmount = (float) ($_POST['application_fee'] ?? 500.00);
-    if ($feeAmount < 0) $feeAmount = 500.00;
-
     $tempPassword = bin2hex(random_bytes(8));
     $passwordHash = password_hash($tempPassword, PASSWORD_DEFAULT);
     $studentNumber = 'STU-' . date('Y') . '-' . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
@@ -76,7 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'approve') {
         $stmt->execute(['id' => $appId]);
 
         // Create application fee ledger entry
-        $feeAmount = max(0, (float) ($_POST['application_fee'] ?? 500.00));
         $stmt = $pdo->prepare("
             INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status, created_at)
             VALUES (:sid, '2026-2027', 'Application Fee', :due, 0, 'unpaid', NOW())
@@ -121,9 +123,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'approve') {
                             </div>
                             <div class="credential">
                                 <div class="credential-label">Application Fee</div>
-                                <div class="credential-value">₱<?= number_format((float)($_POST['application_fee'] ?? 500.00), 2) ?></div>
+                                <div class="credential-value">₱<?= number_format($feeAmount, 2) ?></div>
                             </div>
-                            <p style="margin-top: 16px; color: var(--muted); font-size: 13px;">Share the student number and temporary password with the applicant. They can log in at <a href="/login/student.php" style="color: var(--green);">/login/student.php</a> and will be prompted to change their password on first login.</p>
+                            <p style="margin-top: 16px; color: var(--muted); font-size: 13px;">Share the student number and temporary password with the applicant. They can log in at <a href="/login/student.php" style="color: var(--green);">/login/student.php</a>.</p>
                             <p style="margin-top: 8px;"><a href="/admission/queue.php" class="button button-primary">← Back to Queue</a></p>
                         </div>
                     </article>
@@ -135,10 +137,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'approve') {
         exit;
     } catch (PDOException $e) {
         $pdo->rollBack();
-        // Error - fall through to show form with error
+        // Check for duplicate email error
+        if ($e->getCode() === '23505') {
+            $_SESSION['approve_error'] = 'Cannot approve: a user with this email already exists.';
+        } else {
+            error_log('Approval error: ' . $e->getMessage());
+            $_SESSION['approve_error'] = 'A database error occurred during approval.';
+        }
+        header('Location: /admission/queue.php');
+        exit;
     }
 } elseif ($action === 'reject') {
-    // Process rejection (GET or POST)
+    // Process rejection (POST only with CSRF)
     try {
         $stmt = $pdo->prepare("UPDATE pre_registrations SET status = 'rejected' WHERE id = :id AND status = 'pending'");
         $stmt->execute(['id' => $appId]);
@@ -185,6 +195,11 @@ require dirname(__DIR__) . '/includes/header.php';
                         <div class="detail-field"><label>Level</label><div class="value"><?= htmlspecialchars($application['level'] ?? '—') ?></div></div>
                     </div>
                 </div>
+
+                <?php if (isset($_SESSION['approve_error'])): ?>
+                    <div class="alert alert-error"><?= htmlspecialchars($_SESSION['approve_error']) ?></div>
+                    <?php unset($_SESSION['approve_error']); ?>
+                <?php endif; ?>
 
                 <form method="post" action="/admission/process_application.php" class="approval-form">
                     <input type="hidden" name="id" value="<?= (int) $application['id'] ?>">

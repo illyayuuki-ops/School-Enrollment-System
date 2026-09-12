@@ -38,7 +38,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT COUNT(*)
         FROM pre_registrations pr
-        JOIN users u ON pr.email = u.email
+        LEFT JOIN users u ON pr.email = u.email
         {$where}
     ");
     $stmt->execute($params);
@@ -129,7 +129,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                 <?php foreach ($applications as $app): ?>
                                     <tr>
                                         <td><strong><?= htmlspecialchars($app['application_number'] ?? '—') ?></strong></td>
-                                        <td><?= htmlspecialchars($app['full_name'] ?? $app['last_name'] . ' ' . $app['first_name'] ?? '—') ?></td>
+                                        <td><?= htmlspecialchars($app['full_name'] ?? (($app['last_name'] ?? '') . ' ' . ($app['first_name'] ?? '') ?: '—')) ?></td>
                                         <td><?= htmlspecialchars($app['level_type'] ?? '—') ?></td>
                                         <td><?= htmlspecialchars($app['first_choice_course'] ?? '—') ?></td>
                                         <td><?= htmlspecialchars($app['email'] ?? '—') ?></td>
@@ -144,7 +144,12 @@ require dirname(__DIR__) . '/includes/header.php';
                                                 <a href="/admission/documents.php?id=<?= urlencode($app['id'] ?? '') ?>" class="btn-view">View</a>
                                                 <?php if (($app['status'] ?? 'pending') === 'pending'): ?>
                                                     <a href="/admission/process_application.php?id=<?= urlencode($app['id'] ?? '') ?>&action=approve" class="btn-approve" onclick="return confirm('Approve this application?');">Approve</a>
-                                                    <a href="/admission/process_application.php?id=<?= urlencode($app['id'] ?? '') ?>&action=reject" class="btn-reject" onclick="return confirm('Reject this application?');">Reject</a>
+                                                    <form method="post" action="/admission/process_application.php" style="display: inline;" onsubmit="return confirm('Reject this application?');">
+                                                        <input type="hidden" name="id" value="<?= htmlspecialchars($app['id'] ?? '') ?>">
+                                                        <input type="hidden" name="action" value="reject">
+                                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                                        <button type="submit" class="btn-reject">Reject</button>
+                                                    </form>
                                                 <?php endif; ?>
                                             </div>
                                         </td>

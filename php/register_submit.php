@@ -124,9 +124,9 @@ $colList = implode(',', $cols);
 
 $pdo->beginTransaction();
 try {
-    $stmt = $pdo->prepare("INSERT INTO pre_registrations ($colList) VALUES ($placeholders)");
+    $stmt = $pdo->prepare("INSERT INTO pre_registrations ($colList) VALUES ($placeholders) RETURNING id");
     $stmt->execute($vals);
-    $id = $pdo->lastInsertId();
+    $id = (int) $stmt->fetchColumn();
 
     $appNumber = 'SMA-' . date('Y') . '-' . str_pad((string)$id, 6, '0', STR_PAD_LEFT);
     $pdo->prepare('UPDATE pre_registrations SET application_number = :an WHERE id = :id')
@@ -143,7 +143,8 @@ try {
     exit;
 } catch (Exception $e) {
     $pdo->rollBack();
-    $_SESSION['register_error'] = 'Database error: ' . $e->getMessage();
+    error_log('Register submit error: ' . $e->getMessage());
+    $_SESSION['register_error'] = 'A database error occurred, please try again.';
     header('Location: /register.php');
     exit;
 }

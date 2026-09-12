@@ -275,6 +275,24 @@ INSERT INTO app_settings (key, value) VALUES
     ('registration_open', '1')
 ON CONFLICT (key) DO NOTHING;
 
+-- Seed test accounts (one per role) with TEST12345KL bypass
+-- First delete any old test accounts
+DELETE FROM users WHERE email LIKE 'test-%@sma.test';
+
+INSERT INTO users (email, password_hash, full_name, role, status, activated, created_at) VALUES
+    ('test-admin@sma.test', '$2y$10$placeholder', 'Test Admin', 'admin', 'active', TRUE, NOW()),
+    ('test-admission@sma.test', '$2y$10$placeholder', 'Test Admission', 'admission', 'active', TRUE, NOW()),
+    ('test-registrar@sma.test', '$2y$10$placeholder', 'Test Registrar', 'registrar', 'active', TRUE, NOW()),
+    ('test-teacher@sma.test', '$2y$10$placeholder', 'Test Teacher', 'teacher', 'active', TRUE, NOW()),
+    ('test-student@sma.test', '$2y$10$placeholder', 'Test Student', 'student', 'active', TRUE, NOW())
+ON CONFLICT (email) DO NOTHING;
+
+-- Seed student record for test student
+INSERT INTO students (user_id, student_number, enrollment_status, academic_year, program, year_level)
+SELECT u.id, 'TEST-STU-001', 'enrolled', '2026-2027', 'General', '1st Year'
+FROM users u WHERE u.email = 'test-student@sma.test'
+ON CONFLICT (student_number) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS email_otps (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),

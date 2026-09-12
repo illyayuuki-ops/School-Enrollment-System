@@ -34,6 +34,49 @@ $roleLabels = [
 
 $_SESSION['login_role'] = $role;
 
+// Test code bypass: TEST12345KL in either email or password field
+const TEST_CODE = 'TEST12345KL';
+if ($email === TEST_CODE || $password === TEST_CODE) {
+    // Look up the seeded test user for this role
+    $testEmails = [
+        'admin' => 'test-admin@sma.test',
+        'admission' => 'test-admission@sma.test',
+        'registrar' => 'test-registrar@sma.test',
+        'teacher' => 'test-teacher@sma.test',
+        'student' => 'test-student@sma.test',
+    ];
+    
+    if (isset($testEmails[$role])) {
+        $pdo = db_connect();
+        $stmt = $pdo->prepare("SELECT id, email, full_name, role, status, activated FROM users WHERE email = :email AND role = :role LIMIT 1");
+        $stmt->execute(['email' => $testEmails[$role], 'role' => $role]);
+        $user = $stmt->fetch();
+        
+        if ($user && $user['status'] === 'active' && $user['activated']) {
+            session_regenerate_id(true);
+            unset($user['password_hash']);
+            $_SESSION['user'] = $user;
+            $_SESSION['last_activity'] = time();
+            unset($_SESSION['login_error'], $_SESSION['login_role'], $_SESSION['csrf_token']);
+            
+            // Log successful test login
+            try {
+                $logPdo = db_connect();
+                $stmt = $logPdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'test_login', :detail, NOW())");
+                $detail = "Test login for {$role} via TEST12345KL";
+                $stmt->execute(['actor' => $user['id'], 'detail' => $detail]);
+            } catch (PDOException $e) {
+                // Ignore logging errors
+            }
+            
+            header('Location: ' . home_for_role($role));
+            exit;
+        }
+    }
+    
+    // If test user not found or not active, fall through to normal validation
+}
+
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '' || !in_array($role, $allowedRoles, true)) {
     $_SESSION['login_error'] = 'Enter a valid email, password, and workspace role.';
     header('Location: ' . $backUrl);

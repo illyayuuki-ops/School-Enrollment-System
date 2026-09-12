@@ -106,7 +106,11 @@ class SMTPMailer {
         }
     }
     
-    private function connect(): ?\resource {
+    /**
+     * Connect to SMTP server
+     * @return resource|null Stream socket resource on success, null on failure
+     */
+    private function connect() {
         $host = $this->host;
         $port = $this->port;
         $secure = $this->secure;
@@ -134,11 +138,21 @@ class SMTPMailer {
         return $socket;
     }
     
-    private function sendCommand(\resource $socket, string $command): void {
+    /**
+     * Send SMTP command
+     * @param resource $socket Stream socket resource
+     * @param string $command SMTP command to send
+     */
+    private function sendCommand($socket, string $command): void {
         fwrite($socket, $command . "\r\n");
     }
     
-    private function readResponse(\resource $socket): string {
+    /**
+     * Read SMTP response
+     * @param resource $socket Stream socket resource
+     * @return string Response from server
+     */
+    private function readResponse($socket): string {
         $response = '';
         while (!feof($socket)) {
             $line = fgets($socket, 512);

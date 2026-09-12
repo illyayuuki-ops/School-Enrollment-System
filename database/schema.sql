@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS enrollment_levels (
     level_type VARCHAR(20) NOT NULL,
     name VARCHAR(120) NOT NULL,
     display_order INT NOT NULL DEFAULT 0,
-    active BOOLEAN NOT NULL DEFAULT TRUE
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    UNIQUE (level_type, name)
 );
 INSERT INTO enrollment_levels (level_type, name, display_order) VALUES
     ('BED', 'Grade 7', 1), ('BED', 'Grade 8', 2), ('BED', 'Grade 9', 3),
@@ -34,7 +35,8 @@ CREATE TABLE IF NOT EXISTS enrollment_courses (
     name VARCHAR(160) NOT NULL,
     major_track VARCHAR(120) NULL,
     display_order INT NOT NULL DEFAULT 0,
-    active BOOLEAN NOT NULL DEFAULT TRUE
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    UNIQUE (level_type, name)
 );
 INSERT INTO enrollment_courses (level_type, name, major_track, display_order) VALUES
     ('College', 'BS Information Technology', NULL, 1),
@@ -48,7 +50,8 @@ ON CONFLICT (level_type, name) DO NOTHING;
 CREATE TABLE IF NOT EXISTS enrollment_semesters (
     id SERIAL PRIMARY KEY,
     name VARCHAR(40) NOT NULL,
-    display_order INT NOT NULL
+    display_order INT NOT NULL,
+    UNIQUE (name)
 );
 INSERT INTO enrollment_semesters (name, display_order) VALUES
     ('1st Semester', 1), ('2nd Semester', 2)
@@ -247,7 +250,8 @@ CREATE TABLE IF NOT EXISTS student_ledgers (
     amount_due NUMERIC(10,2) NOT NULL DEFAULT 0,
     amount_paid NUMERIC(10,2) NOT NULL DEFAULT 0,
     status VARCHAR(30) NOT NULL DEFAULT 'unpaid',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (student_id, academic_year, description)
 );
 INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status) VALUES
     (1, '2026-2027', 'Tuition Fee - 1st Semester', 50000.00, 25000.00, 'partial'),
@@ -255,7 +259,7 @@ INSERT INTO student_ledgers (student_id, academic_year, description, amount_due,
     (1, '2026-2027', 'Library Fee', 2000.00, 2000.00, 'paid'),
     (2, '2026-2027', 'Tuition Fee - 1st Semester', 50000.00, 50000.00, 'paid'),
     (2, '2026-2027', 'Miscellaneous Fee', 3000.00, 3000.00, 'paid')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (student_id, academic_year, description) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS system_logs (
     id SERIAL PRIMARY KEY,

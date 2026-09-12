@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/mailer.php';
+require_once __DIR__ . '/includes/otp.php';
 
 $allowedRoles = ['admin', 'admission', 'registrar', 'teacher', 'student'];
 $role = (string) ($_POST['user_role'] ?? '');
@@ -39,7 +41,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '' || !in_array(
 }
 
 $statement = db_connect()->prepare(
-    'SELECT id, email, full_name, password_hash, role, status
+    'SELECT id, email, full_name, password_hash, role, status, activated
      FROM users
      WHERE email = :email AND role = :role
      LIMIT 1'
@@ -53,21 +55,32 @@ if (!$user || $user['status'] !== 'active' || !password_verify($password, $user[
     exit;
 }
 
-session_regenerate_id(true);
-unset($user['password_hash']);
-$_SESSION['user'] = $user;
-$_SESSION['last_activity'] = time();
-unset($_SESSION['login_error'], $_SESSION['login_role'], $_SESSION['csrf_token']);
-
-// Log successful login
-try {
-    $logPdo = db_connect();
-    $stmt = $logPdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'login', :detail, NOW())");
-    $detail = "User {$user['email']} ({$user['role']}) logged in";
-    $stmt->execute(['actor' => $user['id'], 'detail' => $detail]);
-} catch (PDOException $e) {
-    // Ignore logging errors - never break the main flow
+// Check if account is activated
+if (!$user['activated']) {
+    $_SESSION['login_error'] = 'This account has not been activated yet. Please check your email for the activation code and complete activation at <a href="/activate.php">/activate.php</a>.';
+    header('Location: ' . $backUrl);
+    exit;
 }
 
-header('Location: ' . home_for_role($role));
+// Generate login OTP and store pending login in session
+$loginCode = generate_and_store_otp(db_connect(), (int) $user['id'], $email, 'login');
+$emailSent = send_otp_email($email, $user['full_name'], $loginCode, 'login');
+
+if (!$emailSent) {
+    $_SESSION['login_error'] = 'Failed to send login verification code. Please try again later.';
+    header('Location: ' . $backUrl);
+    exit;
+}
+
+// Store pending login info in session
+$_SESSION['pending_login'] = [
+    'user_id' => $user['id'],
+    'email' => $email,
+    'role' => $role,
+    'full_name' => $user['full_name'],
+    'expires_at' => (new DateTime('+5 minutes'))->format('Y-m-d H:i:s'),
+];
+
+// Redirect to OTP verification page
+header('Location: /verify_otp.php');
 exit;

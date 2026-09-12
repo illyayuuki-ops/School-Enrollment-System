@@ -3,6 +3,8 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('admission');
 require_once dirname(__DIR__) . '/db_connect.php';
+require_once dirname(__DIR__) . '/includes/mailer.php';
+require_once dirname(__DIR__) . '/includes/otp.php';
 
 $pdo = db_connect();
 
@@ -54,10 +56,10 @@ if ($action === 'approve') {
 
     $pdo->beginTransaction();
     try {
-        // Create user account
+        // Create user account (inactive until email activation)
         $stmt = $pdo->prepare("
-            INSERT INTO users (email, password_hash, full_name, role, status, created_at)
-            VALUES (:email, :phash, :fname, 'student', 'active', NOW())
+            INSERT INTO users (email, password_hash, full_name, role, status, activated, created_at)
+            VALUES (:email, :phash, :fname, 'student', 'active', FALSE, NOW())
             RETURNING id
         ");
         $stmt->execute(['email' => $email, 'phash' => $passwordHash, 'fname' => $fullName]);
@@ -86,6 +88,20 @@ if ($action === 'approve') {
         $stmt->execute(['sid' => $studentId, 'due' => $feeAmount]);
 
         $pdo->commit();
+
+        // Generate and send activation OTP
+        $activationSent = false;
+        $activationError = '';
+        try {
+            $activationCode = generate_and_store_otp($pdo, $userId, $email, 'activation');
+            $activationSent = send_otp_email($email, $fullName, $activationCode, 'activation');
+            if (!$activationSent) {
+                $activationError = ' (activation email could not be sent)';
+            }
+        } catch (Exception $e) {
+            error_log('Activation OTP error: ' . $e->getMessage());
+            $activationError = ' (activation email failed)';
+        }
 
         // Log the approval
         try {
@@ -125,7 +141,12 @@ if ($action === 'approve') {
                                 <div class="credential-label">Application Fee</div>
                                 <div class="credential-value">₱<?= number_format($feeAmount, 2) ?></div>
                             </div>
-                            <p style="margin-top: 16px; color: var(--muted); font-size: 13px;">Share the student number and temporary password with the applicant. They can log in at <a href="/login/student.php" style="color: var(--green);">/login/student.php</a>.</p>
+                            <p style="margin-top: 16px; color: var(--muted); font-size: 13px;">
+                                The applicant has been sent an <strong>activation code by email</strong> to activate their account. 
+                                They must enter the activation code at <a href="/activate.php" style="color: var(--green);">/activate.php</a> 
+                                and set their password before they can log in.
+                                <?= $activationError ? '<br><span style="color: #dc2626;">' . htmlspecialchars($activationError) . '</span>' : '' ?>
+                            </p>
                             <p style="margin-top: 8px;"><a href="/admission/queue.php" class="button button-primary">← Back to Queue</a></p>
                         </div>
                     </article>
@@ -220,7 +241,7 @@ require dirname(__DIR__) . '/includes/header.php';
                 </form>
 
                 <p style="margin-top: 16px; color: var(--muted); font-size: 13px;">
-                    Approving will create a student account, generate a student number, and add the application fee to the student's ledger. The temporary password will be shown after approval.
+                    Approving will create a student account, generate a student number, and add the application fee to the student's ledger. The account will be inactive until the applicant activates it via the email code.
                 </p>
             </article>
         </section>

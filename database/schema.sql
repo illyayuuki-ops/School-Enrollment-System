@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(160) NOT NULL,
     role user_role NOT NULL,
     status user_status NOT NULL DEFAULT 'active',
+    activated BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -273,3 +274,14 @@ INSERT INTO app_settings (key, value) VALUES
     ('school_name', 'Steiner Maris Academy'),
     ('registration_open', '1')
 ON CONFLICT (key) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS email_otps (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    email VARCHAR(255) NOT NULL,
+    otp_hash TEXT NOT NULL,
+    purpose VARCHAR(20) NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    consumed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

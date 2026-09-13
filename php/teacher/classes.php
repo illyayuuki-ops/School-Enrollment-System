@@ -3,9 +3,12 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('teacher');
 require_once dirname(__DIR__) . '/db_connect.php';
+require_once dirname(__DIR__) . '/includes/settings.php';
 
 $pdo = db_connect();
 $teacherId = (int) ($_SESSION['user']['id'] ?? 0);
+
+$academicYear = get_academic_year($pdo);
 
 $classes = [];
 try {
@@ -25,7 +28,7 @@ require dirname(__DIR__) . '/includes/header.php';
     <main class="main-content">
         <header class="topbar">
             <div><span class="eyebrow">Faculty workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="content-grid">
             <article class="panel panel-wide">
@@ -59,7 +62,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                         <td><?= $c['adviser_section'] ? '<span class="status-badge status-paid" style="font-size: 11px;">Adviser: ' . htmlspecialchars($c['adviser_section']) . '</span>' : '<span class="status-badge status-unpaid" style="font-size: 11px;">Not adviser</span>' ?></td>
                                         <td style="text-align: center;">
                                             <a href="/teacher/grades.php?subject=<?= urlencode($c['subject_code']) ?>" class="button button-secondary" style="font-size: 12px; padding: 6px 12px;">Grades</a>
-                                            <a href="/admin/teacher_attendance.php?teacher_id=<?= urlencode($teacherId) ?>" class="button button-secondary" style="font-size: 12px; padding: 6px 12px; margin-left: 8px;">Attendance</a>
+                                            <a href="/teacher/attendance.php?subject=<?= urlencode($c['subject_code']) ?>" class="button button-secondary" style="font-size: 12px; padding: 6px 12px; margin-left: 8px;">Attendance</a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

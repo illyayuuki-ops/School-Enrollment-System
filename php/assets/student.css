@@ -3,6 +3,65 @@
  * Uses SMA CSS variables from app.css: --navy, --green, --line, --ink, --muted, --radius, --shadow
  */
 
+/* ===== Data Table ===== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.data-table thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.data-table thead th:first-child {
+    border-top-left-radius: var(--radius);
+}
+
+.data-table thead th:last-child {
+    border-top-right-radius: var(--radius);
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.15s ease;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background: rgba(15, 81, 50, 0.03);
+}
+
+.data-table tbody tr:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.data-table td {
+    padding: 12px 14px;
+    color: var(--ink);
+    vertical-align: middle;
+}
+
+.data-table td:first-child {
+    padding-left: 14px;
+}
+
+.data-table td:last-child {
+    padding-right: 14px;
+}
+
+.data-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: var(--radius);
+}
+
+.data-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: var(--radius);
+}
+
 /* ===== Step List ===== */
 .step-list {
     list-style: none;
@@ -232,3 +291,155 @@
         font-size: 12px;
     }
 }
+
+/* ===== Ledger Table ===== */
+.ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.ledger-table thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ledger-table thead th:first-child {
+    border-top-left-radius: var(--radius);
+}
+
+.ledger-table thead th:last-child {
+    border-top-right-radius: var(--radius);
+}
+
+.ledger-table tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.15s ease;
+}
+
+.ledger-table tbody tr:nth-child(even) {
+    background: rgba(15, 81, 50, 0.03);
+}
+
+.ledger-table tbody tr:hover {
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.ledger-table td {
+    padding: 12px 14px;
+    color: var(--ink);
+    vertical-align: middle;
+}
+
+.ledger-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: var(--radius);
+}
+
+.ledger-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: var(--radius);
+}
+
+.ledger-table .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.ledger-table .status-unpaid {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.ledger-table .status-partial {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.ledger-table .status-paid {
+    background: #e4f7f0;
+    color: var(--green);
+}
+
+.ledger-table .amount {
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.ledger-table .amount-due {
+    color: #dc2626;
+}
+
+.ledger-table .amount-paid {
+    color: var(--green);
+}
+
+.ledger-table .balance {
+    font-weight: 700;
+}
+
+/* ===== Grade Pass/Fail Indicators ===== */
+.grade-cell {
+    font-family: ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+}
+
+.grade-cell.pass {
+    background: #e4f7f0;
+    color: var(--green);
+}
+
+.grade-cell.fail {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.grade-cell.pending {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.grade-input {
+    width: 80px;
+    text-align: center;
+}
+
+.grade-input.pass {
+    background: #e4f7f0;
+    border-color: var(--green);
+}
+
+.grade-input.fail {
+    background: #fef2f2;
+    border-color: #dc2626;
+}
+
+.grade-input.pending {
+    background: #fffbeb;
+    border-color: #f59e0b;
+}
+
+/* ===== Grade Row Status ===== */
+.data-table tbody tr.grade-submitted {
+    background: linear-gradient(90deg, rgba(5, 150, 105, 0.08), transparent);
+}
+
+.data-table tbody tr.grade-pending {
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.08), transparent);
+}
+
+.data-table td {

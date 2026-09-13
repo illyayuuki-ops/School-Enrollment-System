@@ -33,7 +33,7 @@ require dirname(__DIR__) . '/includes/header.php';
     <main class="main-content">
         <header class="topbar">
             <div><span class="eyebrow">Admissions workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="content-grid">
             <article class="panel panel-wide">
@@ -263,7 +263,12 @@ require dirname(__DIR__) . '/includes/header.php';
 
                     <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: flex-end;">
                         <a href="/admission/process_application.php?id=<?= urlencode($application['id']) ?>&action=approve" class="btn-approve" onclick="return confirm('Approve this application?');">Approve</a>
-                        <a href="/admission/process_application.php?id=<?= urlencode($application['id']) ?>&action=reject" class="btn-reject" onclick="return confirm('Reject this application?');">Reject</a>
+                        <form method="post" action="/admission/process_application.php" style="display: inline;" onsubmit="return confirm('Reject this application?');">
+                            <input type="hidden" name="id" value="<?= htmlspecialchars($application['id'] ?? '') ?>">
+                            <input type="hidden" name="action" value="reject">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                            <button type="submit" class="btn-reject">Reject</button>
+                        </form>
                     </div>
                 <?php endif; ?>
             </article>

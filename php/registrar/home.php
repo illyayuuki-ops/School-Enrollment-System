@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('registrar');
 require_once dirname(__DIR__) . '/db_connect.php';
+require_once dirname(__DIR__) . '/includes/settings.php';
 
 $pdo = db_connect();
 
@@ -43,7 +44,7 @@ require dirname(__DIR__) . '/includes/header.php';
     <main class="main-content">
         <header class="topbar">
             <div><span class="eyebrow">Registrar workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="dashboard-grid">
             <article class="metric-card"><span class="eyebrow">Enrolled students</span><strong><?= number_format($enrolledStudents) ?></strong><small>Total: <?= number_format($totalStudents) ?></small></article>
@@ -60,14 +61,6 @@ require dirname(__DIR__) . '/includes/header.php';
                     <a href="/registrar/subjects.php"><span class="action-icon amber">03</span><span><strong>Subject Allocation</strong><small>Manage course offerings</small></span><span class="arrow">↗</span></a>
                     <a href="/registrar/payments.php"><span class="action-icon blue">04</span><span><strong>Payments / Assessment</strong><small>View balances and ledgers</small></span><span class="arrow">↗</span></a>
                 </div>
-            </article>
-            <article class="panel">
-                <div class="panel-heading"><div><span class="eyebrow">Recent Activity</span><h2>Record Changes</h2></div></div>
-                <ul class="activity-list">
-                    <li><span class="activity-dot green"></span><span><strong>Section assigned</strong><small>BSCS 2A · 30 min ago</small></span></li>
-                    <li><span class="activity-dot blue"></span><span><strong>Record updated</strong><small>J. Dela Cruz · 2 hrs ago</small></span></li>
-                    <li><span class="activity-dot amber"></span><span><strong>Graduation audit</strong><small>Batch 2024 · 1 day ago</small></span></li>
-                </ul>
             </article>
         </section>
     </main>

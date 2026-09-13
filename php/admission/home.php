@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('admission');
 require_once dirname(__DIR__) . '/db_connect.php';
+require_once dirname(__DIR__) . '/includes/settings.php';
 
 $pdo = db_connect();
 
@@ -33,6 +34,24 @@ try {
 
 $conversionRate = $totalCount > 0 ? round(($approvedCount / $totalCount) * 100, 1) : 0;
 
+// Get recent admission-related activity from system_logs
+$recentActivity = [];
+try {
+    $stmt = $pdo->prepare("
+        SELECT action, detail, created_at
+        FROM system_logs
+        WHERE action IN ('application_approved', 'application_rejected')
+        ORDER BY created_at DESC
+        LIMIT 5
+    ");
+    $stmt->execute();
+    $recentActivity = $stmt->fetchAll();
+} catch (PDOException $e) {
+    // Keep empty
+}
+
+$conversionRate = $totalCount > 0 ? round(($approvedCount / $totalCount) * 100, 1) : 0;
+
 $pageTitle = 'Admissions Overview';
 $extraStyles = ['/assets/admission.css'];
 require dirname(__DIR__) . '/includes/header.php';
@@ -42,7 +61,7 @@ require dirname(__DIR__) . '/includes/header.php';
     <main class="main-content">
         <header class="topbar">
             <div><span class="eyebrow">Admissions workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="dashboard-grid">
             <article class="metric-card"><span class="eyebrow">Total applications</span><strong><?= number_format($totalCount) ?></strong><small><?= $pendingCount ?> pending review</small></article>
@@ -61,11 +80,21 @@ require dirname(__DIR__) . '/includes/header.php';
             </article>
             <article class="panel">
                 <div class="panel-heading"><div><span class="eyebrow">Recent Activity</span><h2>Application Updates</h2></div></div>
-                <ul class="activity-list">
-                    <li><span class="activity-dot green"></span><span><strong>Application verified</strong><small>Maria Santos · 8 min ago</small></span></li>
-                    <li><span class="activity-dot blue"></span><span><strong>New application received</strong><small>Daniel Tan · 24 min ago</small></span></li>
-                    <li><span class="activity-dot amber"></span><span><strong>Document returned</strong><small>Leah Wong · 1 hr ago</small></span></li>
-                </ul>
+                <?php if (empty($recentActivity)): ?>
+                    <div class="empty-state" style="padding: 16px;">
+                        <p>No recent activity.</p>
+                    </div>
+                <?php else: ?>
+                    <ul class="activity-list">
+                        <?php foreach ($recentActivity as $activity): ?>
+                            <li>
+                                <span class="activity-dot" style="background: <?= $activity['action'] === 'application_approved' ? 'var(--green)' : '#dc2626' ?>;"></span>
+                                <span><strong><?= htmlspecialchars($activity['action'] === 'application_approved' ? 'Application approved' : 'Application rejected') ?></strong>
+                                <small><?= date('M d, Y H:i', strtotime($activity['created_at'])) ?> — <?= htmlspecialchars($activity['detail']) ?></small></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
             </article>
         </section>
     </main>

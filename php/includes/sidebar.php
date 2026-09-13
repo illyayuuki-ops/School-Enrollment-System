@@ -5,6 +5,9 @@ $role = $_SESSION['user']['role'] ?? 'guest';
 $roleHome = $role === 'guest'
     ? '/login/student.php'
     : (function_exists('home_for_role') ? home_for_role($role) : "/$role/home.php");
+require_once dirname(__DIR__) . '/includes/settings.php';
+
+$academicYearLabel = academic_year_label($pdo);
 $navigation = [
     'admin' => [
         ['label' => 'Dashboard', 'href' => $roleHome],
@@ -34,12 +37,16 @@ $navigation = [
         ['label' => 'Active Classes', 'href' => '/teacher/classes.php'],
         ['label' => 'Grade Encoding', 'href' => '/teacher/grades.php'],
         ['label' => 'Schedule Matrix', 'href' => '/teacher/schedule.php'],
+        ['label' => 'My Attendance', 'href' => '/teacher/attendance.php'],
     ],
     'student' => [
         ['label' => 'Dashboard', 'href' => $roleHome],
-        ['label' => 'Enrollment', 'href' => '/student/enrollment.php'],
-        ['label' => 'Study Load', 'href' => '/student/load.php'],
-        ['label' => 'Application Status', 'href' => '/student/status.php'],
+        ['label' => 'Profile', 'href' => '/student/profile.php'],
+        ['label' => 'Statement of Account', 'href' => '/student/statement.php'],
+        ['label' => 'Grades', 'href' => '/student/grades.php'],
+        ['label' => 'Subjects', 'href' => '/student/subjects.php'],
+        ['label' => 'Academic Policies', 'href' => '/student/policies.php'],
+        ['label' => 'FAQ', 'href' => '/student/faq.php'],
     ],
 ][$role] ?? [['label' => 'Sign In', 'href' => '/login/student.php']];
 ?>
@@ -50,7 +57,7 @@ $navigation = [
     </a>
     <div class="sidebar-context">
         <span class="eyebrow">Academic year</span>
-        <strong>A.Y. 2026–2027</strong>
+        <strong><?= htmlspecialchars(academic_year_label($pdo)) ?></strong>
     </div>
     <nav aria-label="Main navigation">
         <?php foreach ($navigation as $item): ?>

@@ -3,9 +3,12 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('student');
 require_once dirname(__DIR__) . '/db_connect.php';
+require_once dirname(__DIR__) . '/includes/settings.php';
 
 $pdo = db_connect();
 $studentId = (int) ($_SESSION['user']['id'] ?? 0);
+
+$academicYear = get_academic_year($pdo);
 
 // Get student record
 $student = null;
@@ -32,9 +35,9 @@ try {
         $totalDue = array_sum(array_column($ledger, 'amount_due'));
         $totalPaid = array_sum(array_column($ledger, 'amount_paid'));
 
-        // Count enrolled courses
+        // Count enrolled courses - use student.id (integer)
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM student_courses WHERE student_id = :sid AND status = 'enrolled'");
-        $stmt->execute(['sid' => $student['student_number']]);
+        $stmt->execute(['sid' => $student['id']]);
         $enrolledCourses = (int) $stmt->fetchColumn();
     }
 } catch (PDOException $e) {
@@ -52,13 +55,13 @@ require dirname(__DIR__) . '/includes/header.php';
     <main class="main-content">
         <header class="topbar">
             <div><span class="eyebrow">Student workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
 
         <?php if ($student): ?>
             <!-- Balance Summary -->
             <div class="student-balance-summary" style="margin: 24px auto; max-width: 800px;">
-                <div class="summary-title">Account Balance (A.Y. 2026–2027)</div>
+                <div class="summary-title">Account Balance (<?= htmlspecialchars(get_academic_year($pdo)) ?>)</div>
                 <div class="summary-row">
                     <span class="summary-label">Total Assessed</span>
                     <span class="summary-value due">₱<?= number_format($totalDue, 2) ?></span>
@@ -77,7 +80,7 @@ require dirname(__DIR__) . '/includes/header.php';
         <section class="dashboard-grid">
             <article class="metric-card"><span class="eyebrow">Enrolled courses</span><strong><?= $enrolledCourses > 0 ? $enrolledCourses : '—' ?></strong><small><?= $enrolledCourses > 0 ? 'active courses' : 'no courses enrolled' ?></small></article>
             <article class="metric-card"><span class="eyebrow">Outstanding balance</span><strong><?= $balance > 0 ? '₱' . number_format($balance, 2) : '—' ?></strong><small><?= $balance > 0 ? 'payment required' : 'no outstanding balance' ?></small></article>
-            <article class="metric-card"><span class="eyebrow">Enrolled courses</span><strong><?= $enrolledCourses > 0 ? $enrolledCourses : '—' ?></strong><small><?= $enrolledCourses > 0 ? 'active courses' : 'no courses enrolled' ?></small></article>
+            <article class="metric-card"><span class="eyebrow">GPA</span><strong>—</strong><small>data not available</small></article>
             <article class="metric-card accent-card"><span class="eyebrow">Attendance</span><strong>—</strong><small>data not available</small><div class="progress"><span style="width:0%"></span></div></article>
         </section>
         <section class="content-grid">
@@ -86,7 +89,11 @@ require dirname(__DIR__) . '/includes/header.php';
                 <div class="action-list">
                     <a href="/student/enrollment.php"><span class="action-icon blue">01</span><span><strong>Enrollment</strong><small>View enrollment process and steps</small></span><span class="arrow">↗</span></a>
                     <a href="/student/load.php"><span class="action-icon green">02</span><span><strong>Study Load</strong><small>View enrolled courses and schedule</small></span><span class="arrow">↗</span></a>
-                    <a href="/student/status.php"><span class="action-icon amber">03</span><span><strong>Application Status</strong><small>Check application and enrollment status</small></span><span class="arrow">↗</span></a>
+                    <a href="/student/grades.php"><span class="action-icon amber">03</span><span><strong>Grades</strong><small>View grades and academic standing</small></span><span class="arrow">↗</span></a>
+                    <a href="/student/subjects.php"><span class="action-icon amber">04</span><span><strong>Subjects</strong><small>View plan of study</small></span><span class="arrow">↗</span></a>
+                    <a href="/student/statement.php"><span class="action-icon amber">05</span><span><strong>Statement of Account</strong><small>View balance and payment history</small></span><span class="arrow">↗</span></a>
+                    <a href="/student/policies.php"><span class="action-icon amber">06</span><span><strong>Academic Policies</strong><small>View academic handbook</small></span><span class="arrow">↗</span></a>
+                    <a href="/student/faq.php"><span class="action-icon amber">07</span><span><strong>FAQ</strong><small>Frequently asked questions</small></span><span class="arrow">↗</span></a>
                 </div>
             </article>
         </section>

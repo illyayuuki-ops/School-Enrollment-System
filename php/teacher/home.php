@@ -3,9 +3,15 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('teacher');
 require_once dirname(__DIR__) . '/db_connect.php';
+require_once dirname(__DIR__) . '/includes/settings.php';
 
 $pdo = db_connect();
 $teacherId = (int) ($_SESSION['user']['id'] ?? 0);
+
+// Get settings from app_settings
+$academicYear = get_academic_year($pdo);
+$semester = get_default_semester($pdo);
+$schoolName = get_school_name($pdo);
 
 // Active classes count
 $activeClasses = 0;
@@ -66,11 +72,12 @@ try {
     $stmt->execute(['tid' => $teacherId]);
     $recentAttendance = $stmt->fetchAll();
 } catch (PDOException $e) {
-    // Empty on error
+    // Keep defaults
 }
 
-// Adviser section check
+// Adviser section check - get actual advisees
 $adviserSection = null;
+$advisees = [];
 try {
     $stmt = $pdo->prepare("
         SELECT adviser_section FROM classes_and_schedules 
@@ -79,6 +86,20 @@ try {
     ");
     $stmt->execute(['tid' => $teacherId]);
     $adviserSection = $stmt->fetchColumn();
+    
+    // If adviser, get actual advisees
+    if ($adviserSection) {
+        $stmt = $pdo->prepare("
+            SELECT s.student_number, u.full_name
+            FROM students s
+            JOIN users u ON s.user_id = u.id
+            WHERE s.year_level = (SELECT year_level FROM classes_and_schedules WHERE adviser_section = :as LIMIT 1)
+            AND s.section = :as
+            ORDER BY u.full_name
+        ");
+        $stmt->execute(['as' => $adviserSection]);
+        $advisees = $stmt->fetchAll();
+    }
 } catch (PDOException $e) {
     // Empty on error
 }
@@ -92,13 +113,13 @@ require dirname(__DIR__) . '/includes/header.php';
     <main class="main-content">
         <header class="topbar">
             <div><span class="eyebrow">Faculty workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars($academicYear) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="dashboard-grid">
             <article class="metric-card"><span class="eyebrow">Active classes</span><strong><?= $activeClasses ?></strong></article>
             <article class="metric-card"><span class="eyebrow">Total students</span><strong><?= $totalStudents ?></strong></article>
-            <article class="metric-card"><span class="eyebrow">Pending grades</span><strong>—</strong></article>
-            <article class="metric-card accent-card"><span class="eyebrow">Completion rate</span><strong>—</strong></article>
+            <article class="metric-card"><span class="eyebrow">Pending grades</span><strong><?= $pendingGrades ?? '—' ?></strong></article>
+            <article class="metric-card accent-card"><span class="eyebrow">Completion rate</span><strong><?= $completionRate ?? '—' ?></strong></article>
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">
@@ -107,6 +128,7 @@ require dirname(__DIR__) . '/includes/header.php';
                     <a href="/teacher/classes.php"><span class="action-icon blue">01</span><span><strong>Active Classes</strong><small>Manage rosters and schedules</small></span><span class="arrow">↗</span></a>
                     <a href="/teacher/grades.php"><span class="action-icon green">02</span><span><strong>Grade Encoding</strong><small>Enter and submit grades</small></span><span class="arrow">↗</span></a>
                     <a href="/teacher/schedule.php"><span class="action-icon amber">03</span><span><strong>Schedule Matrix</strong><small>View weekly timetable</small></span><span class="arrow">↗</span></a>
+                    <a href="/teacher/attendance.php"><span class="action-icon amber">04</span><span><strong>My Attendance</strong><small>View my attendance records</small></span><span class="arrow">↗</span></a>
                 </div>
             </article>
             <article class="panel">
@@ -153,10 +175,23 @@ require dirname(__DIR__) . '/includes/header.php';
             </article>
             <?php if ($adviserSection): ?>
             <article class="panel">
-                <div class="panel-heading"><div><span class="eyebrow">Adviser</span><h2>Section Adviser</h2></div></div>
+                <div class="panel-heading"><div><span class="eyebrow">Adviser</span><h2>My Advisees</h2></div></div>
                 <div style="padding: 16px;">
                     <p>You are the adviser for section <strong><?= htmlspecialchars($adviserSection) ?></strong>.</p>
-                    <p style="margin-top: 8px; color: var(--muted); font-size: 13px;">Advisee count and section details available in the Registrar's sectioning module.</p>
+                    <?php if (!empty($advisees)): ?>
+                        <div style="margin-top: 12px;">
+                            <h4 style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--navy);">Advisees</h4>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                <?php foreach ($advisees as $advisee): ?>
+                                    <li style="margin-bottom: 4px;">
+                                        <strong><?= htmlspecialchars($advisee['student_number']) ?></strong> — <?= htmlspecialchars($advisee['full_name']) ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php else: ?>
+                        <p style="margin-top: 8px; color: var(--muted); font-size: 13px;">No advisees assigned yet.</p>
+                    <?php endif; ?>
                 </div>
             </article>
             <?php endif; ?>

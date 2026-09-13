@@ -89,7 +89,32 @@ CREATE TABLE IF NOT EXISTS students (
     academic_year VARCHAR(20) NOT NULL,
     current_load_id INTEGER,
     program VARCHAR(160) NOT NULL,
-    year_level VARCHAR(40) NOT NULL
+    year_level VARCHAR(40) NOT NULL,
+    section_id INTEGER REFERENCES sections(id)
+);
+
+CREATE TABLE IF NOT EXISTS students (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    student_number VARCHAR(32) NOT NULL UNIQUE,
+    enrollment_status enrollment_status NOT NULL DEFAULT 'pending',
+    academic_year VARCHAR(20) NOT NULL,
+    current_load_id INTEGER,
+    program VARCHAR(160) NOT NULL,
+    year_level VARCHAR(40) NOT NULL,
+    section_id INTEGER REFERENCES sections(id)
+);
+
+CREATE TABLE IF NOT EXISTS sections (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
+    level_type VARCHAR(20) NOT NULL CHECK (level_type IN ('BED', 'College', 'TESDA')),
+    program VARCHAR(160) NOT NULL,
+    year_level VARCHAR(40) NOT NULL,
+    adviser_id INTEGER REFERENCES users(id),
+    capacity INTEGER NOT NULL DEFAULT 40,
+    academic_year VARCHAR(20) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS enrollment_queue (
@@ -110,7 +135,8 @@ CREATE TABLE IF NOT EXISTS classes_and_schedules (
     room VARCHAR(80) NOT NULL,
     capacity INTEGER NOT NULL,
     enrolled_count INTEGER NOT NULL DEFAULT 0,
-    adviser_section VARCHAR(40) NULL
+    adviser_section VARCHAR(40) NULL,
+    units INTEGER NULL
 );
 
 DO $$ BEGIN
@@ -257,13 +283,6 @@ CREATE TABLE IF NOT EXISTS student_ledgers (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (student_id, academic_year, description)
 );
-INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status) VALUES
-    (1, '2026-2027', 'Tuition Fee - 1st Semester', 50000.00, 25000.00, 'partial'),
-    (1, '2026-2027', 'Laboratory Fee', 5000.00, 0.00, 'unpaid'),
-    (1, '2026-2027', 'Library Fee', 2000.00, 2000.00, 'paid'),
-    (2, '2026-2027', 'Tuition Fee - 1st Semester', 50000.00, 50000.00, 'paid'),
-    (2, '2026-2027', 'Miscellaneous Fee', 3000.00, 3000.00, 'paid')
-ON CONFLICT (student_id, academic_year, description) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS system_logs (
     id SERIAL PRIMARY KEY,
@@ -301,7 +320,62 @@ SELECT u.id, 'TEST-STU-001', 'enrolled', '2026-2027', 'General', '1st Year'
 FROM users u WHERE u.email = 'test-student@sma.test'
 ON CONFLICT (student_number) DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS teacher_attendance (
+-- Seed student grades (passed and failed for testing red/green indicators)
+INSERT INTO student_grades (student_id, academic_year, semester, year_level, section, subject_code, subject_name, units, final_grade, remark) 
+SELECT s.id, '2026-2027', '1st Semester', '1st Year', 'A', sc.subject_code, sc.subject_name, sc.units, 
+       CASE WHEN sc.subject_code LIKE 'CS%' THEN '1.5' ELSE '3.5' END,
+       CASE WHEN sc.subject_code LIKE 'CS%' THEN 'Passed' ELSE 'Failed' END
+FROM students s
+JOIN student_courses sc ON sc.student_id = s.id
+WHERE s.student_number = 'TEST-STU-001'
+ON CONFLICT DO NOTHING;
+
+-- Seed plan of study subjects
+INSERT INTO plan_of_study_subjects (student_id, year_level, semester, subject_code, description, units, prerequisite, curriculum_year, status, display_order) 
+SELECT s.id, '1st Year', '1st Semester', sc.subject_code, sc.subject_name, sc.units, 'None', '2026', 'planned', 1
+FROM students s
+JOIN student_courses sc ON sc.student_id = s.id
+WHERE s.student_number = 'TEST-STU-001'
+ON CONFLICT DO NOTHING;
+
+-- Seed student courses (using correct integer FK students.id)
+INSERT INTO student_courses (student_id, academic_year, semester, subject_code, subject_name, units, status) 
+SELECT s.id, '2026-2027', '1st Semester', sc.subject_code, sc.subject_name, sc.units, 'enrolled'
+FROM students s
+JOIN enrollment_courses ec ON ec.level_type = 'College'
+JOIN classes_and_schedules cs ON cs.subject_code = ec.name
+WHERE s.student_number = 'TEST-STU-001'
+ON CONFLICT DO NOTHING;
+
+-- Seed academic policy documents
+INSERT INTO academic_policy_documents (title, file_name, academic_year, page_count, summary, updated_at) VALUES
+    ('Student Handbook 2026-2027', 'student_handbook_2026.pdf', '2026-2027', 45, 'Complete student handbook covering all academic policies, student rights, and campus regulations.', NOW()),
+    ('Academic Calendar 2026-2027', 'academic_calendar_2026.pdf', '2026-2027', 12, 'Official academic calendar including enrollment periods, examination schedules, and holiday breaks.', NOW()),
+    ('Code of Conduct', 'code_of_conduct.pdf', '2026-2027', 28, 'Student code of conduct including disciplinary policies, academic integrity, and campus behavior standards.', NOW())
+ON CONFLICT DO NOTHING;
+
+-- Seed academic policy pages
+INSERT INTO academic_policy_pages (document_id, page_number, heading, body) 
+SELECT d.id, 1, 'Introduction', 'Welcome to the Student Handbook. This document outlines the policies and procedures that govern student life at Steiner Maris Academy.'
+FROM academic_policy_documents d WHERE d.title = 'Student Handbook 2026-2027'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO academic_policy_pages (document_id, page_number, heading, body) 
+SELECT d.id, 2, 'Academic Policies', 'All students are expected to maintain satisfactory academic progress. The minimum GPA requirement is 2.0 for undergraduate programs.'
+FROM academic_policy_documents d WHERE d.title = 'Student Handbook 2026-2027'
+ON CONFLICT DO NOTHING;
+
+-- Seed FAQ entries
+INSERT INTO faq_entries (question, answer, display_order, active, updated_at) VALUES
+    ('How do I enroll for the next semester?', 'Log in to the student portal, go to the Enrollment page, and follow the 6-step enrollment process. Contact your academic advisor for assistance.', 1, TRUE, NOW()),
+    ('How do I check my grades?', 'Go to the Grades page in the student portal. Grades are organized by academic year and semester. You can view your final grades and remarks for each subject.', 2, TRUE, NOW()),
+    ('How do I view my Statement of Account?', 'Go to the Statement of Account page to view your complete payment history, outstanding balance, and payment status for all academic years.', 3, TRUE, NOW()),
+    ('How do I pay my tuition?', 'You can pay your tuition through the Payment page or visit the cashier office. Online payment options include bank transfer and credit card.', 4, TRUE, NOW()),
+    ('What is the passing grade?', 'For College programs, grades 1.0 to 3.0 are passing. For BED and TESDA programs, a numeric grade of 75 or above is passing. Grades of 3.5 and above are considered failing.', 5, TRUE, NOW()),
+    ('How do I check my class schedule?', 'Go to the Subjects / Plan of Study page or the Schedule page in the student portal to view your class schedule.', 6, TRUE, NOW()),
+    ('Who do I contact for academic advising?', 'Your assigned academic adviser is listed on your Classes page. You can also visit the Registrar''s office for assistance.', 7, TRUE, NOW()),
+    ('What if I lose my student ID?', 'Visit the Registrar''s office to request a replacement ID. A replacement fee may apply.', 8, TRUE, NOW())
+ON CONFLICT DO NOTHING;
     id SERIAL PRIMARY KEY,
     teacher_id INTEGER NOT NULL REFERENCES users(id),
     work_date DATE NOT NULL,

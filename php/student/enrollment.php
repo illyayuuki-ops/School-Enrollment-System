@@ -3,9 +3,12 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('student');
 require_once dirname(__DIR__) . '/db_connect.php';
+require_once dirname(__DIR__) . '/includes/settings.php';
 
 $pdo = db_connect();
 $studentId = (int) ($_SESSION['user']['id'] ?? 0);
+
+$academicYear = get_academic_year($pdo);
 
 // Get student record
 $student = null;
@@ -44,71 +47,57 @@ require dirname(__DIR__) . '/includes/header.php';
     <main class="main-content">
         <header class="topbar">
             <div><span class="eyebrow">Student workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars($academicYear) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="content-grid">
             <article class="panel panel-wide">
                 <div class="panel-heading"><div><span class="eyebrow">Enrollment</span><h2>Enrollment Process</h2></div></div>
                 
-                <?php if (empty($enrollmentSteps)): ?>
-                    <!-- Static enrollment process steps -->
-                    <ol class="step-list">
-                        <li class="step-item">
-                            <span class="step-number">1</span>
-                            <div class="step-content">
-                                <strong>Application</strong>
-                                <span>Submit pre-registration application with required documents</span>
-                            </div>
-                        </li>
-                        <li class="step-item">
-                            <span class="step-number">2</span>
-                            <div class="step-content">
-                                <strong>Assessment</strong>
-                                <span>Admissions office reviews application and verifies documents</span>
-                            </div>
-                        </li>
-                        <li class="step-item">
-                            <span class="step-number">3</span>
-                            <div class="step-content">
-                                <strong>Payment</strong>
-                                <span>Pay assessed fees including application fee and tuition</span>
-                            </div>
-                        </li>
-                        <li class="step-item">
-                            <span class="step-number">4</span>
-                            <div class="step-content">
-                                <strong>Advising</strong>
-                                <span>Meet with academic advisor to select courses and plan schedule</span>
-                            </div>
-                        </li>
-                        <li class="step-item">
-                            <span class="step-number">5</span>
-                            <div class="step-content">
-                                <strong>Enlistment</strong>
-                                <span>Enroll in approved courses for the semester</span>
-                            </div>
-                        </li>
-                        <li class="step-item">
-                            <span class="step-number">6</span>
-                            <div class="step-content">
-                                <strong>Confirmation</strong>
-                                <span>Receive official enrollment confirmation and student ID</span>
-                            </div>
-                        </li>
-                    </ol>
-                <?php else: ?>
-                    <ol class="step-list">
-                        <?php foreach ($enrollmentSteps as $step): ?>
-                            <li class="step-item <?= $step['status'] === 'completed' ? 'completed' : ($step['status'] === 'in_progress' ? 'current' : 'pending') ?>">
-                                <span class="step-number"><?= (int) $step['display_order'] ?></span>
-                                <div class="step-content">
-                                    <strong><?= htmlspecialchars($step['label']) ?></strong>
-                                    <span class="step-status"><?= htmlspecialchars(ucfirst($step['status'])) ?></span>
-                                </div>
-                            </li>
-                        <?php endforeach; ?>
-                    </ol>
-                <?php endif; ?>
+                <!-- Static enrollment process steps - always show 1-6 -->
+                <ol class="step-list">
+                    <li class="step-item">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Application</strong>
+                            <span>Submit pre-registration application with required documents</span>
+                        </div>
+                    </li>
+                    <li class="step-item">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Assessment</strong>
+                            <span>Admissions office reviews application and verifies documents</span>
+                        </div>
+                    </li>
+                    <li class="step-item">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <strong>Payment</strong>
+                            <span>Pay assessed fees including application fee and tuition</span>
+                        </div>
+                    </li>
+                    <li class="step-item">
+                        <span class="step-number">4</span>
+                        <div class="step-content">
+                            <strong>Advising</strong>
+                            <span>Meet with academic advisor to select courses and plan schedule</span>
+                        </div>
+                    </li>
+                    <li class="step-item">
+                        <span class="step-number">5</span>
+                        <div class="step-content">
+                            <strong>Enlistment</strong>
+                            <span>Enroll in approved courses for the semester</span>
+                        </div>
+                    </li>
+                    <li class="step-item">
+                        <span class="step-number">6</span>
+                        <div class="step-content">
+                            <strong>Confirmation</strong>
+                            <span>Receive official enrollment confirmation and student ID</span>
+                        </div>
+                    </li>
+                </ol>
             </article>
         </section>
     </main>

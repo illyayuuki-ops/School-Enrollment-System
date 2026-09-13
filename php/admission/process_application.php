@@ -5,6 +5,7 @@ require_role('admission');
 require_once dirname(__DIR__) . '/db_connect.php';
 require_once dirname(__DIR__) . '/includes/mailer.php';
 require_once dirname(__DIR__) . '/includes/otp.php';
+require_once dirname(__DIR__) . '/includes/settings.php';
 
 $pdo = db_connect();
 
@@ -15,21 +16,6 @@ if (!$appId || !in_array($action, ['approve', 'reject'], true)) {
     header('Location: /admission/queue.php');
     exit;
 }
-
-// Verify CSRF for all state-changing actions (both approve and reject)
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /admission/queue.php');
-    exit;
-}
-
-$csrfToken = (string) ($_POST['csrf_token'] ?? '');
-if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
-    header('Location: /admission/queue.php?error=csrf');
-    exit;
-}
-
-// Consolidate application fee reading
-$feeAmount = max(0, (float) ($_POST['application_fee'] ?? 500.00));
 
 // Fetch application
 $application = null;
@@ -46,8 +32,95 @@ if (!$application) {
     exit;
 }
 
+// Get academic year from settings
+$academicYear = get_academic_year($pdo);
+
+// CSRF check only for POST requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrfToken = (string) ($_POST['csrf_token'] ?? '');
+    if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
+        header('Location: /admission/queue.php?error=csrf');
+        exit;
+    }
+}
+
+// Consolidate application fee reading
+$feeAmount = max(0, (float) ($_POST['application_fee'] ?? 500.00));
+
 if ($action === 'approve') {
-    // Process approval with application fee
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        // GET request - show approval form
+        $feeAmount = 500.00; // Default application fee
+        $pageTitle = 'Approve Application';
+        $extraStyles = ['/assets/admission.css'];
+        require dirname(__DIR__) . '/includes/header.php';
+        ?>
+        <div class="app-frame">
+            <?php require dirname(__DIR__) . '/includes/sidebar.php'; ?>
+            <main class="main-content">
+                <header class="topbar">
+                    <div><span class="eyebrow">Admissions workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
+                    <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+                </header>
+                <section class="content-grid">
+                    <article class="panel panel-wide">
+                        <div class="panel-heading"><div><span class="eyebrow">Approve</span><h2>Approve Application</h2></div></div>
+
+                        <div class="detail-section">
+                            <h4>Applicant Information</h4>
+                            <div class="detail-grid">
+                                <div class="detail-field"><label>Name</label><div class="value"><?= htmlspecialchars(($application['first_name'] ?? '') . ' ' . ($application['last_name'] ?? '')) ?></div></div>
+                                <div class="detail-field"><label>Email</label><div class="value"><?= htmlspecialchars($application['email'] ?? '—') ?></div></div>
+                                <div class="detail-field"><label>Program</label><div class="value"><?= htmlspecialchars($application['first_choice_course'] ?? '—') ?></div></div>
+                                <div class="detail-field"><label>Level</label><div class="value"><?= htmlspecialchars($application['level'] ?? '—') ?></div></div>
+                            </div>
+                        </div>
+
+                        <?php if (isset($_SESSION['approve_error'])): ?>
+                            <div class="alert alert-error"><?= htmlspecialchars($_SESSION['approve_error']) ?></div>
+                            <?php unset($_SESSION['approve_error']); ?>
+                        <?php endif; ?>
+
+                        <form method="post" action="/admission/process_application.php" class="approval-form">
+                            <input type="hidden" name="id" value="<?= (int) $application['id'] ?>">
+                            <input type="hidden" name="action" value="approve">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+
+                            <div class="form-grid">
+                                <div class="form-field">
+                                    <label for="application_fee">Application Fee (₱)</label>
+                                    <input type="number" id="application_fee" name="application_fee" step="0.01" min="0" value="500.00" required style="height: 40px;">
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-approve">Approve & Create Account</button>
+                                <a href="/admission/queue.php" class="button button-secondary">Cancel</a>
+                            </div>
+                        </form>
+
+                        <p style="margin-top: 16px; color: var(--muted); font-size: 13px;">
+                            Approving will create a student account, generate a student number, and add the application fee to the student's ledger. The account will be inactive until the applicant activates it via the email code.
+                        </p>
+                    </article>
+                </section>
+            </main>
+        </div>
+        <?php require dirname(__DIR__) . '/includes/footer.php'; ?>
+        <?php
+        exit;
+    }
+
+    // POST request - process approval
+    $csrfToken = (string) ($_POST['csrf_token'] ?? '');
+    if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
+        header('Location: /admission/queue.php?error=csrf');
+        exit;
+    }
+
+    // Consolidate application fee reading
+    $feeAmount = max(0, (float) ($_POST['application_fee'] ?? 500.00));
+
     $tempPassword = bin2hex(random_bytes(8));
     $passwordHash = password_hash($tempPassword, PASSWORD_DEFAULT);
     $studentNumber = 'STU-' . date('Y') . '-' . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
@@ -68,12 +141,16 @@ if ($action === 'approve') {
         // Create student record
         $stmt = $pdo->prepare("
             INSERT INTO students (user_id, student_number, enrollment_status, academic_year, program, year_level)
-            VALUES (:uid, :sn, 'enrolled', '2026-2027', :prog, :yr)
+            VALUES (:uid, :sn, 'enrolled', :ay, :prog, :yr)
             RETURNING id
         ");
         $prog = $application['first_choice_course'] ?? 'General';
         $yr = $application['level'] ?? '1st Year';
-        $stmt->execute(['uid' => $userId, 'sn' => $studentNumber, 'prog' => $prog, 'yr' => $yr]);
+        // Fallback for year_level if it's '-'
+        if ($yr === '-' || $yr === '') {
+            $yr = '1st Year';
+        }
+        $stmt->execute(['uid' => $userId, 'sn' => $studentNumber, 'ay' => $academicYear, 'prog' => $prog, 'yr' => $yr]);
         $studentId = $stmt->fetchColumn();
 
         // Update application status
@@ -83,9 +160,9 @@ if ($action === 'approve') {
         // Create application fee ledger entry
         $stmt = $pdo->prepare("
             INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status, created_at)
-            VALUES (:sid, '2026-2027', 'Application Fee', :due, 0, 'unpaid', NOW())
+            VALUES (:sid, :ay, 'Application Fee', :due, 0, 'unpaid', NOW())
         ");
-        $stmt->execute(['sid' => $studentId, 'due' => $feeAmount]);
+        $stmt->execute(['sid' => $studentId, 'ay' => $academicYear, 'due' => $feeAmount]);
 
         $pdo->commit();
 
@@ -122,7 +199,7 @@ if ($action === 'approve') {
             <main class="main-content">
                 <header class="topbar">
                     <div><span class="eyebrow">Admissions workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-                    <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+                    <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
                 </header>
                 <section class="content-grid">
                     <article class="panel panel-wide">
@@ -169,6 +246,18 @@ if ($action === 'approve') {
         exit;
     }
 } elseif ($action === 'reject') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header('Location: /admission/queue.php');
+        exit;
+    }
+
+    // CSRF check for reject
+    $csrfToken = (string) ($_POST['csrf_token'] ?? '');
+    if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
+        header('Location: /admission/queue.php?error=csrf');
+        exit;
+    }
+
     // Process rejection (POST only with CSRF)
     try {
         $stmt = $pdo->prepare("UPDATE pre_registrations SET status = 'rejected' WHERE id = :id AND status = 'pending'");
@@ -190,61 +279,5 @@ if ($action === 'approve') {
     }
 }
 
-// Show approval form (GET for approve)
-$feeAmount = 500.00; // Default application fee
-$pageTitle = 'Approve Application';
-$extraStyles = ['/assets/admission.css'];
-require dirname(__DIR__) . '/includes/header.php';
-?>
-<div class="app-frame">
-    <?php require dirname(__DIR__) . '/includes/sidebar.php'; ?>
-    <main class="main-content">
-<header class="topbar">
-                    <div><span class="eyebrow">Admissions workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-                    <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
-                </header>
-        <section class="content-grid">
-            <article class="panel panel-wide">
-                <div class="panel-heading"><div><span class="eyebrow">Approve</span><h2>Approve Application</h2></div></div>
-
-                <div class="detail-section">
-                    <h4>Applicant Information</h4>
-                    <div class="detail-grid">
-                        <div class="detail-field"><label>Name</label><div class="value"><?= htmlspecialchars(($application['first_name'] ?? '') . ' ' . ($application['last_name'] ?? '')) ?></div></div>
-                        <div class="detail-field"><label>Email</label><div class="value"><?= htmlspecialchars($application['email'] ?? '—') ?></div></div>
-                        <div class="detail-field"><label>Program</label><div class="value"><?= htmlspecialchars($application['first_choice_course'] ?? '—') ?></div></div>
-                        <div class="detail-field"><label>Level</label><div class="value"><?= htmlspecialchars($application['level'] ?? '—') ?></div></div>
-                    </div>
-                </div>
-
-                <?php if (isset($_SESSION['approve_error'])): ?>
-                    <div class="alert alert-error"><?= htmlspecialchars($_SESSION['approve_error']) ?></div>
-                    <?php unset($_SESSION['approve_error']); ?>
-                <?php endif; ?>
-
-                <form method="post" action="/admission/process_application.php" class="approval-form">
-                    <input type="hidden" name="id" value="<?= (int) $application['id'] ?>">
-                    <input type="hidden" name="action" value="approve">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label for="application_fee">Application Fee (₱)</label>
-                            <input type="number" id="application_fee" name="application_fee" step="0.01" min="0" value="500.00" required style="height: 40px;">
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn-approve">Approve & Create Account</button>
-                        <a href="/admission/queue.php" class="button button-secondary">Cancel</a>
-                    </div>
-                </form>
-
-                <p style="margin-top: 16px; color: var(--muted); font-size: 13px;">
-                    Approving will create a student account, generate a student number, and add the application fee to the student's ledger. The account will be inactive until the applicant activates it via the email code.
-                </p>
-            </article>
-        </section>
-    </main>
-</div>
-<?php require dirname(__DIR__) . '/includes/footer.php'; ?>
+header('Location: /admission/queue.php?error=unknown_action');
+exit;

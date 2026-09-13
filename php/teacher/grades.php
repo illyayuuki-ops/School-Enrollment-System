@@ -3,9 +3,13 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_role('teacher');
 require_once dirname(__DIR__) . '/db_connect.php';
+require_once dirname(__DIR__) . '/includes/settings.php';
 
 $pdo = db_connect();
 $teacherId = (int) ($_SESSION['user']['id'] ?? 0);
+
+$academicYear = get_academic_year($pdo);
+$semester = get_default_semester($pdo);
 
 $classes = [];
 try {
@@ -47,7 +51,7 @@ if ($selectedSubject && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $existingGrades = [];
         try {
             $stmt = $pdo->prepare('SELECT student_id, final_grade, remark FROM student_grades WHERE subject_code = :sc AND academic_year = :ay AND semester = :sem');
-            $stmt->execute(['sc' => $selectedSubject, 'ay' => '2026-2027', 'sem' => '1st Semester']);
+            $stmt->execute(['sc' => $selectedSubject, 'ay' => $academicYear, 'sem' => $semester]);
             while ($row = $stmt->fetch()) {
                 $existingGrades[$row['student_id']] = ['grade' => $row['final_grade'], 'remark' => $row['remark']];
             }
@@ -73,44 +77,56 @@ if ($selectedSubject && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     // Check if record exists
                     $stmt = $pdo->prepare('SELECT 1 FROM student_grades WHERE student_id = :sid AND subject_code = :sc AND academic_year = :ay AND semester = :sem');
-                    $stmt->execute(['sid' => $studentId, 'sc' => $selectedSubject, 'ay' => '2026-2027', 'sem' => '1st Semester']);
+                    $stmt->execute(['sid' => $studentId, 'sc' => $selectedSubject, 'ay' => $academicYear, 'sem' => $semester]);
                     if ($stmt->fetch()) {
                         $pdo->prepare('UPDATE student_grades SET final_grade = :g, remark = :r, year_level = :yl, section = :sec WHERE student_id = :sid AND subject_code = :sc AND academic_year = :ay AND semester = :sem')
-                            ->execute(['g' => $grade, 'r' => $remark, 'yl' => $yearLevel, 'sec' => $section, 'sid' => $studentId, 'sc' => $selectedSubject, 'ay' => '2026-2027', 'sem' => '1st Semester']);
+                            ->execute(['g' => $grade, 'r' => $remark, 'yl' => $yearLevel, 'sec' => $section, 'sid' => $studentId, 'sc' => $selectedSubject, 'ay' => $academicYear, 'sem' => $semester]);
                     } else {
                         $pdo->prepare('INSERT INTO student_grades (student_id, academic_year, semester, year_level, section, subject_code, subject_name, units, final_grade, remark) VALUES (:sid, :ay, :sem, :yl, :sec, :sc, :sn, :u, :g, :r)')
-                            ->execute(['sid' => $studentId, 'ay' => '2026-2027', 'sem' => '1st Semester', 'yl' => $yearLevel, 'sec' => $section, 'sc' => $selectedSubject, 'sn' => $subjectName, 'u' => $units, 'g' => $grade, 'r' => $remark]);
+                            ->execute(['sid' => $studentId, 'ay' => $academicYear, 'sem' => $semester, 'yl' => $yearLevel, 'sec' => $section, 'sc' => $selectedSubject, 'sn' => $subjectName, 'u' => $units, 'g' => $grade, 'r' => $remark]);
                     }
                 }
                 $pdo->commit();
                 $success = true;
             } catch (PDOException $e) {
                 $pdo->rollBack();
-                $error = 'Database error: ' . $e->getMessage();
+                $error = 'An error occurred while saving grades. Please try again.';
+                error_log('Grade save error: ' . $e->getMessage());
             }
         }
     }
 }
 
-// Load students for the selected subject
+// Load students for the selected subject - only those enrolled in the subject/section
 $students = [];
 if ($selectedSubject && !$error) {
     try {
-        $stmt = $pdo->query("SELECT id, student_number, full_name FROM students ORDER BY full_name");
-        $allStudents = $stmt->fetchAll();
+        // Get students enrolled in this subject for the current academic year/semester
+        $stmt = $pdo->prepare("
+            SELECT sc.student_id, s.student_number, u.full_name, sc.grade, sc.remark
+            FROM student_courses sc
+            JOIN students s ON sc.student_id = s.id
+            JOIN users u ON s.user_id = u.id
+            WHERE sc.subject_code = :sc 
+            AND sc.academic_year = :ay 
+            AND sc.semester = :sem
+            ORDER BY u.full_name
+        ");
+        $stmt->execute(['sc' => $selectedSubject, 'ay' => $academicYear, 'sem' => $semester]);
+        $enrolledStudents = $stmt->fetchAll();
 
-        // Merge with existing grades
+        // Get existing grades
         $existingGrades = [];
         try {
             $stmt = $pdo->prepare('SELECT student_id, final_grade, remark FROM student_grades WHERE subject_code = :sc AND academic_year = :ay AND semester = :sem');
-            $stmt->execute(['sc' => $selectedSubject, 'ay' => '2026-2027', 'sem' => '1st Semester']);
+            $stmt->execute(['sc' => $selectedSubject, 'ay' => $academicYear, 'sem' => $semester]);
             while ($row = $stmt->fetch()) {
                 $existingGrades[$row['student_id']] = ['grade' => $row['final_grade'], 'remark' => $row['remark']];
             }
         } catch (PDOException $e) {}
 
-        foreach ($allStudents as $s) {
-            $sid = (int) $s['id'];
+        foreach ($enrolledStudents as $s) {
+            $sid = (int) $s['student_id'];
             $students[] = [
                 'id' => $sid,
                 'student_number' => $s['student_number'],
@@ -133,7 +149,7 @@ require dirname(__DIR__) . '/includes/header.php';
     <main class="main-content">
         <header class="topbar">
             <div><span class="eyebrow">Faculty workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill">A.Y. 2026–2027</span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="content-grid">
             <article class="panel panel-wide">
@@ -176,6 +192,15 @@ require dirname(__DIR__) . '/includes/header.php';
                                     <option value="2nd Year">2nd Year</option>
                                     <option value="3rd Year">3rd Year</option>
                                     <option value="4th Year">4th Year</option>
+                                    <option value="Grade 7">Grade 7</option>
+                                    <option value="Grade 8">Grade 8</option>
+                                    <option value="Grade 9">Grade 9</option>
+                                    <option value="Grade 10">Grade 10</option>
+                                    <option value="Grade 11">Grade 11</option>
+                                    <option value="Grade 12">Grade 12</option>
+                                    <option value="NC I">NC I</option>
+                                    <option value="NC II">NC II</option>
+                                    <option value="NC III">NC III</option>
                                 </select>
                             </div>
                             <div class="form-field">
@@ -190,7 +215,7 @@ require dirname(__DIR__) . '/includes/header.php';
 
                         <?php if (empty($students)): ?>
                             <div class="empty-state">
-                                <p>No student roster data available. Add students to the system first.</p>
+                                <p>No students enrolled in this subject for the current academic year/semester.</p>
                             </div>
                         <?php else: ?>
                             <div class="table-wrapper" style="overflow-x: auto;">
@@ -209,7 +234,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                                 <td><strong><?= htmlspecialchars($s['student_number']) ?></strong></td>
                                                 <td><?= htmlspecialchars($s['full_name']) ?></td>
                                                 <td style="text-align: center;">
-                                                    <input type="text" name="grade[<?= (int) $s['id'] ?>]" value="<?= htmlspecialchars($s['grade']) ?>" placeholder="e.g. 1.0, 1.5" class="grade-input" style="padding: 8px; border: 1px solid #ccdcd5; border-radius: 6px; text-align: center; font-size: 13px;">
+                                                    <input type="text" name="grade[<?= (int) $s['id'] ?>]" value="<?= htmlspecialchars($s['grade']) ?>" placeholder="e.g. 1.0, 1.5, 75" class="grade-input" style="padding: 8px; border: 1px solid #ccdcd5; border-radius: 6px; text-align: center; font-size: 13px;">
                                                 </td>
                                                 <td>
                                                     <input type="text" name="remark[<?= (int) $s['id'] ?>]" value="<?= htmlspecialchars($s['remark']) ?>" placeholder="Optional" class="remark-input" style="padding: 8px; border: 1px solid #ccdcd5; border-radius: 6px; font-size: 13px;">

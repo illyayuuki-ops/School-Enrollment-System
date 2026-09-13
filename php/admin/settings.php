@@ -174,33 +174,6 @@ require dirname(__DIR__) . '/includes/header.php';
                         </div>
                     </div>
 
-                    <div style="margin-top: 24px; padding: 16px; background: #f8faf9; border: 1px solid var(--line); border-radius: var(--radius);">
-                        <h4 style="margin: 0 0 16px; font-size: 13px; font-weight: 700; color: var(--navy);">Level Activation (Active This School Year)</h4>
-                        <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                            <div class="form-field" style="align-items: flex-start;">
-                                <label for="level_active_BED">BED (Basic Education)</label>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="checkbox" id="level_active_BED" name="level_active_BED" value="1" <?= $settings['level_active_BED'] === '1' ? 'checked' : '' ?>>
-                                    <label for="level_active_BED" style="margin: 0; font-weight: 500; font-size: 13px;">Active this school year</label>
-                                </div>
-                            </div>
-                            <div class="form-field" style="align-items: flex-start;">
-                                <label for="level_active_College">College</label>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="checkbox" id="level_active_College" name="level_active_College" value="1" <?= $settings['level_active_College'] === '1' ? 'checked' : '' ?>>
-                                    <label for="level_active_College" style="margin: 0; font-weight: 500; font-size: 13px;">Active this school year</label>
-                                </div>
-                            </div>
-                            <div class="form-field" style="align-items: flex-start;">
-                                <label for="level_active_TESDA">TESDA</label>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="checkbox" id="level_active_TESDA" name="level_active_TESDA" value="1" <?= $settings['level_active_TESDA'] === '1' ? 'checked' : '' ?>>
-                                    <label for="level_active_TESDA" style="margin: 0; font-weight: 500; font-size: 13px;">Active this school year</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="form-actions">
                         <button type="submit" class="btn-save">Save Settings</button>
                     </div>

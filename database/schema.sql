@@ -329,6 +329,20 @@ SELECT s.id, '2026-2027', 'Miscellaneous Fee', 3000.00, 3000.00, 'paid'
 FROM students s WHERE s.student_number = 'TEST-STU-001'
 ON CONFLICT (student_id, academic_year, description) DO NOTHING;
 
+INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status)
+SELECT s.id, '2026-2027', 'Miscellaneous Fee', 3000.00, 3000.00, 'paid'
+FROM students s WHERE s.student_number = 'TEST-STU-001'
+ON CONFLICT (student_id, academic_year, description) DO NOTHING;
+
+-- Seed student courses (using correct integer FK students.id) - simplified seed for test student
+-- MUST RUN BEFORE student_grades and plan_of_study_subjects which JOIN student_courses
+INSERT INTO student_courses (student_id, academic_year, semester, subject_code, subject_name, units, status) VALUES
+    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'CS101', 'Introduction to Computer Science', 3, 'enrolled'),
+    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'MATH101', 'College Algebra', 3, 'enrolled'),
+    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'ENG101', 'English Composition', 3, 'enrolled'),
+    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'PHYS101', 'General Physics', 4, 'enrolled')
+ON CONFLICT DO NOTHING;
+
 -- Seed student grades (passed and failed for testing red/green indicators)
 INSERT INTO student_grades (student_id, academic_year, semester, year_level, section, subject_code, subject_name, units, final_grade, remark) 
 SELECT s.id, '2026-2027', '1st Semester', '1st Year', 'A', sc.subject_code, sc.subject_name, sc.units, 
@@ -345,14 +359,6 @@ SELECT s.id, '1st Year', '1st Semester', sc.subject_code, sc.subject_name, sc.un
 FROM students s
 JOIN student_courses sc ON sc.student_id = s.id
 WHERE s.student_number = 'TEST-STU-001'
-ON CONFLICT DO NOTHING;
-
--- Seed student courses (using correct integer FK students.id) - simplified seed for test student
-INSERT INTO student_courses (student_id, academic_year, semester, subject_code, subject_name, units, status) VALUES
-    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'CS101', 'Introduction to Computer Science', 3, 'enrolled'),
-    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'MATH101', 'College Algebra', 3, 'enrolled'),
-    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'ENG101', 'English Composition', 3, 'enrolled'),
-    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'PHYS101', 'General Physics', 4, 'enrolled')
 ON CONFLICT DO NOTHING;
 
 -- Seed academic policy documents
@@ -374,15 +380,6 @@ FROM academic_policy_documents d WHERE d.title = 'Student Handbook 2026-2027'
 ON CONFLICT DO NOTHING;
 
 -- Seed FAQ entries
-INSERT INTO faq_entries (question, answer, display_order, active, updated_at) VALUES
-    ('How do I enroll for the next semester?', 'Log in to the student portal, go to the Enrollment page, and follow the 6-step enrollment process. Contact your academic advisor for assistance.', 1, TRUE, NOW()),
-    ('How do I check my grades?', 'Go to the Grades page in the student portal. Grades are organized by academic year and semester. You can view your final grades and remarks for each subject.', 2, TRUE, NOW()),
-    ('How do I view my Statement of Account?', 'Go to the Statement of Account page to view your complete payment history, outstanding balance, and payment status for all academic years.', 3, TRUE, NOW()),
-    ('How do I pay my tuition?', 'You can pay your tuition through the Payment page or visit the cashier office. Online payment options include bank transfer and credit card.', 4, TRUE, NOW()),
-    ('What is the passing grade?', 'For College programs, grades 1.0 to 3.0 are passing. For BED and TESDA programs, a numeric grade of 75 or above is passing. Grades of 3.5 and above are considered failing.', 5, TRUE, NOW()),
-    ('How do I check my class schedule?', 'Go to the Subjects / Plan of Study page or the Schedule page in the student portal to view your class schedule.', 6, TRUE, NOW()),
-    ('Who do I contact for academic advising?', 'Your assigned academic adviser is listed on your Classes page. You can also visit the Registrar''s office for assistance.', 7, TRUE, NOW()),
-    ('What if I lose my student ID?', 'Visit the Registrar''s office to request a replacement ID. A replacement fee may apply.', 8, TRUE, NOW())
 INSERT INTO faq_entries (question, answer, display_order, active, updated_at) VALUES
     ('How do I enroll for the next semester?', 'Log in to the student portal, go to the Enrollment page, and follow the 6-step enrollment process. Contact your academic advisor for assistance.', 1, TRUE, NOW()),
     ('How do I check my grades?', 'Go to the Grades page in the student portal. Grades are organized by academic year and semester. You can view your final grades and remarks for each subject.', 2, TRUE, NOW()),
@@ -414,5 +411,4 @@ CREATE TABLE IF NOT EXISTS email_otps (
     expires_at TIMESTAMPTZ NOT NULL,
     consumed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
 );

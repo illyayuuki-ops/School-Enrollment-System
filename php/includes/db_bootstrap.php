@@ -28,6 +28,17 @@ function ensure_schema(PDO $pdo): void
 
     foreach ($statements as $stmt) {
         $stmt = trim($stmt);
+        // Strip leading comment lines (--) from the statement
+        $lines = explode("\n", $stmt);
+        $filteredLines = [];
+        foreach ($lines as $line) {
+            $trimmedLine = ltrim($line);
+            if (!str_starts_with($trimmedLine, '--')) {
+                $filteredLines[] = $line;
+            }
+        }
+        $stmt = trim(implode("\n", $filteredLines));
+        
         if ($stmt === '' || str_starts_with($stmt, '--')) {
             continue;
         }

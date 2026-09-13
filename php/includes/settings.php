@@ -16,7 +16,7 @@ declare(strict_types=1);
 function get_setting(PDO $pdo, string $key, ?string $default = null): ?string
 {
     try {
-        $stmt = $pdo->prepare("SELECT value FROM app_settings WHERE `key` = :key");
+        $stmt = $pdo->prepare('SELECT value FROM app_settings WHERE "key" = :key');
         $stmt->execute(['key' => $key]);
         $row = $stmt->fetch();
         return $row ? (string) $row['value'] : $default;

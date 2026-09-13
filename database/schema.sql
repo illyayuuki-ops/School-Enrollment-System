@@ -81,16 +81,12 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS students (
+CREATE TABLE IF NOT EXISTS system_logs (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
-    student_number VARCHAR(32) NOT NULL UNIQUE,
-    enrollment_status enrollment_status NOT NULL DEFAULT 'pending',
-    academic_year VARCHAR(20) NOT NULL,
-    current_load_id INTEGER,
-    program VARCHAR(160) NOT NULL,
-    year_level VARCHAR(40) NOT NULL,
-    section_id INTEGER REFERENCES sections(id)
+    actor_user_id INTEGER REFERENCES users(id),
+    action VARCHAR NOT NULL,
+    detail TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS sections (
@@ -103,6 +99,18 @@ CREATE TABLE IF NOT EXISTS sections (
     capacity INTEGER NOT NULL DEFAULT 40,
     academic_year VARCHAR(20) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS students (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    student_number VARCHAR(32) NOT NULL UNIQUE,
+    enrollment_status enrollment_status NOT NULL DEFAULT 'pending',
+    academic_year VARCHAR(20) NOT NULL,
+    current_load_id INTEGER,
+    program VARCHAR(160) NOT NULL,
+    year_level VARCHAR(40) NOT NULL,
+    section_id INTEGER REFERENCES sections(id)
 );
 
 CREATE TABLE IF NOT EXISTS enrollment_queue (
@@ -339,13 +347,12 @@ JOIN student_courses sc ON sc.student_id = s.id
 WHERE s.student_number = 'TEST-STU-001'
 ON CONFLICT DO NOTHING;
 
--- Seed student courses (using correct integer FK students.id)
-INSERT INTO student_courses (student_id, academic_year, semester, subject_code, subject_name, units, status) 
-SELECT s.id, '2026-2027', '1st Semester', sc.subject_code, sc.subject_name, sc.units, 'enrolled'
-FROM students s
-JOIN enrollment_courses ec ON ec.level_type = 'College'
-JOIN classes_and_schedules cs ON cs.subject_code = ec.name
-WHERE s.student_number = 'TEST-STU-001'
+-- Seed student courses (using correct integer FK students.id) - simplified seed for test student
+INSERT INTO student_courses (student_id, academic_year, semester, subject_code, subject_name, units, status) VALUES
+    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'CS101', 'Introduction to Computer Science', 3, 'enrolled'),
+    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'MATH101', 'College Algebra', 3, 'enrolled'),
+    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'ENG101', 'English Composition', 3, 'enrolled'),
+    ((SELECT id FROM students WHERE student_number = 'TEST-STU-001'), '2026-2027', '1st Semester', 'PHYS101', 'General Physics', 4, 'enrolled')
 ON CONFLICT DO NOTHING;
 
 -- Seed academic policy documents
@@ -376,8 +383,18 @@ INSERT INTO faq_entries (question, answer, display_order, active, updated_at) VA
     ('How do I check my class schedule?', 'Go to the Subjects / Plan of Study page or the Schedule page in the student portal to view your class schedule.', 6, TRUE, NOW()),
     ('Who do I contact for academic advising?', 'Your assigned academic adviser is listed on your Classes page. You can also visit the Registrar''s office for assistance.', 7, TRUE, NOW()),
     ('What if I lose my student ID?', 'Visit the Registrar''s office to request a replacement ID. A replacement fee may apply.', 8, TRUE, NOW())
+INSERT INTO faq_entries (question, answer, display_order, active, updated_at) VALUES
+    ('How do I enroll for the next semester?', 'Log in to the student portal, go to the Enrollment page, and follow the 6-step enrollment process. Contact your academic advisor for assistance.', 1, TRUE, NOW()),
+    ('How do I check my grades?', 'Go to the Grades page in the student portal. Grades are organized by academic year and semester. You can view your final grades and remarks for each subject.', 2, TRUE, NOW()),
+    ('How do I view my Statement of Account?', 'Go to the Statement of Account page to view your complete payment history, outstanding balance, and payment status for all academic years.', 3, TRUE, NOW()),
+    ('How do I pay my tuition?', 'You can pay your tuition through the Payment page or visit the cashier office. Online payment options include bank transfer and credit card.', 4, TRUE, NOW()),
+    ('What is the passing grade?', 'For College programs, grades 1.0 to 3.0 are passing. For BED and TESDA programs, a numeric grade of 75 or above is passing. Grades of 3.5 and above are considered failing.', 5, TRUE, NOW()),
+    ('How do I check my class schedule?', 'Go to the Subjects / Plan of Study page or the Schedule page in the student portal to view your class schedule.', 6, TRUE, NOW()),
+    ('Who do I contact for academic advising?', 'Your assigned academic adviser is listed on your Classes page. You can also visit the Registrar''s office for assistance.', 7, TRUE, NOW()),
+    ('What if I lose my student ID?', 'Visit the Registrar''s office to request a replacement ID. A replacement fee may apply.', 8, TRUE, NOW())
 ON CONFLICT DO NOTHING;
-    CREATE TABLE IF NOT EXISTS teacher_attendance (
+
+CREATE TABLE IF NOT EXISTS teacher_attendance (
     id SERIAL PRIMARY KEY,
     teacher_id INTEGER NOT NULL REFERENCES users(id),
     work_date DATE NOT NULL,
@@ -397,4 +414,5 @@ CREATE TABLE IF NOT EXISTS email_otps (
     expires_at TIMESTAMPTZ NOT NULL,
     consumed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 );

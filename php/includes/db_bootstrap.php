@@ -65,6 +65,7 @@ function ensure_schema(PDO $pdo): void
 
 /**
  * Split SQL into individual statements, respecting dollar-quoted blocks ($$...$$ or $tag$...$tag$).
+ * Also strips leading comment lines (--) and blank lines from each statement.
  * 
  * @param string $sql The full SQL content
  * @return array Individual SQL statements
@@ -142,5 +143,27 @@ function split_sql_statements(string $sql): array
         $statements[] = $current;
     }
 
-    return $statements;
+    // Strip leading comment lines and blank lines from each statement
+    $filteredStatements = [];
+    foreach ($statements as $stmt) {
+        $lines = explode("\n", $stmt);
+        $filteredLines = [];
+        $foundNonComment = false;
+        foreach ($lines as $line) {
+            $trimmedLine = ltrim($line);
+            if (!$foundNonComment) {
+                if ($trimmedLine === '' || str_starts_with($trimmedLine, '--')) {
+                    continue; // Skip leading blank lines and comment lines
+                }
+                $foundNonComment = true;
+            }
+            $filteredLines[] = $line;
+        }
+        $filteredStmt = trim(implode("\n", $filteredLines));
+        if ($filteredStmt !== '') {
+            $filteredStatements[] = $filteredStmt;
+        }
+    }
+
+    return $filteredStatements;
 }

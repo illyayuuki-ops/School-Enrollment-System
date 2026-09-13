@@ -93,18 +93,6 @@ CREATE TABLE IF NOT EXISTS students (
     section_id INTEGER REFERENCES sections(id)
 );
 
-CREATE TABLE IF NOT EXISTS students (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
-    student_number VARCHAR(32) NOT NULL UNIQUE,
-    enrollment_status enrollment_status NOT NULL DEFAULT 'pending',
-    academic_year VARCHAR(20) NOT NULL,
-    current_load_id INTEGER,
-    program VARCHAR(160) NOT NULL,
-    year_level VARCHAR(40) NOT NULL,
-    section_id INTEGER REFERENCES sections(id)
-);
-
 CREATE TABLE IF NOT EXISTS sections (
     id SERIAL PRIMARY KEY,
     name VARCHAR(80) NOT NULL,
@@ -284,14 +272,6 @@ CREATE TABLE IF NOT EXISTS student_ledgers (
     UNIQUE (student_id, academic_year, description)
 );
 
-CREATE TABLE IF NOT EXISTS system_logs (
-    id SERIAL PRIMARY KEY,
-    actor_user_id INTEGER REFERENCES users(id),
-    action VARCHAR NOT NULL,
-    detail TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
 CREATE TABLE IF NOT EXISTS app_settings (
     key VARCHAR PRIMARY KEY,
     value TEXT
@@ -319,6 +299,27 @@ INSERT INTO students (user_id, student_number, enrollment_status, academic_year,
 SELECT u.id, 'TEST-STU-001', 'enrolled', '2026-2027', 'General', '1st Year'
 FROM users u WHERE u.email = 'test-student@sma.test'
 ON CONFLICT (student_number) DO NOTHING;
+
+-- Seed student ledger entries for test student (referencing test student by student_number)
+INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status)
+SELECT s.id, '2026-2027', 'Tuition Fee - 1st Semester', 50000.00, 25000.00, 'partial'
+FROM students s WHERE s.student_number = 'TEST-STU-001'
+ON CONFLICT (student_id, academic_year, description) DO NOTHING;
+
+INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status)
+SELECT s.id, '2026-2027', 'Laboratory Fee', 5000.00, 0.00, 'unpaid'
+FROM students s WHERE s.student_number = 'TEST-STU-001'
+ON CONFLICT (student_id, academic_year, description) DO NOTHING;
+
+INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status)
+SELECT s.id, '2026-2027', 'Library Fee', 2000.00, 2000.00, 'paid'
+FROM students s WHERE s.student_number = 'TEST-STU-001'
+ON CONFLICT (student_id, academic_year, description) DO NOTHING;
+
+INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status)
+SELECT s.id, '2026-2027', 'Miscellaneous Fee', 3000.00, 3000.00, 'paid'
+FROM students s WHERE s.student_number = 'TEST-STU-001'
+ON CONFLICT (student_id, academic_year, description) DO NOTHING;
 
 -- Seed student grades (passed and failed for testing red/green indicators)
 INSERT INTO student_grades (student_id, academic_year, semester, year_level, section, subject_code, subject_name, units, final_grade, remark) 
@@ -376,6 +377,7 @@ INSERT INTO faq_entries (question, answer, display_order, active, updated_at) VA
     ('Who do I contact for academic advising?', 'Your assigned academic adviser is listed on your Classes page. You can also visit the Registrar''s office for assistance.', 7, TRUE, NOW()),
     ('What if I lose my student ID?', 'Visit the Registrar''s office to request a replacement ID. A replacement fee may apply.', 8, TRUE, NOW())
 ON CONFLICT DO NOTHING;
+    CREATE TABLE IF NOT EXISTS teacher_attendance (
     id SERIAL PRIMARY KEY,
     teacher_id INTEGER NOT NULL REFERENCES users(id),
     work_date DATE NOT NULL,

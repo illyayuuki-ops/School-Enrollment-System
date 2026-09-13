@@ -81,7 +81,6 @@ require dirname(__DIR__) . '/includes/header.php';
             <article class="metric-card"><span class="eyebrow">Enrolled courses</span><strong><?= $enrolledCourses > 0 ? $enrolledCourses : '—' ?></strong><small><?= $enrolledCourses > 0 ? 'active courses' : 'no courses enrolled' ?></small></article>
             <article class="metric-card"><span class="eyebrow">Outstanding balance</span><strong><?= $balance > 0 ? '₱' . number_format($balance, 2) : '—' ?></strong><small><?= $balance > 0 ? 'payment required' : 'no outstanding balance' ?></small></article>
             <article class="metric-card"><span class="eyebrow">GPA</span><strong>—</strong><small>data not available</small></article>
-            <article class="metric-card accent-card"><span class="eyebrow">Attendance</span><strong>—</strong><small>data not available</small><div class="progress"><span style="width:0%"></span></div></article>
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">

@@ -30,7 +30,7 @@ try {
             WHERE student_id = :sid
             ORDER BY display_order
         ");
-        $stmt->execute(['sid' => $student['student_number']]);
+        $stmt->execute(['sid' => $student['id']]);
         $enrollmentSteps = $stmt->fetchAll();
     }
 } catch (PDOException $e) {

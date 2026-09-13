@@ -19,19 +19,24 @@ try {
     $student = $stmt->fetch();
 
     if ($student) {
-        // Get ledger grouped by academic year
+        // Get ledger by student.id (numeric)
         $stmt = $pdo->prepare("
             SELECT id, academic_year, description, amount_due, amount_paid, status, created_at
             FROM student_ledgers
             WHERE student_id = :sid
-            ORDER BY academic_year DESC, created_at DESC
+            ORDER BY created_at DESC
         ");
         $stmt->execute(['sid' => $student['id']]);
         $ledger = $stmt->fetchAll();
+
+        $totalDue = array_sum(array_column($ledger, 'amount_due'));
+        $totalPaid = array_sum(array_column($ledger, 'amount_paid'));
     }
 } catch (PDOException $e) {
     // Keep defaults on error
 }
+
+$balance = $totalDue - $totalPaid;
 
 $pageTitle = 'Statement of Account';
 $extraStyles = ['/assets/student.css'];
@@ -45,33 +50,28 @@ require dirname(__DIR__) . '/includes/header.php';
             <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
 
+        <?php if ($student): ?>
+            <!-- Balance Summary -->
+            <div class="student-balance-summary" style="margin: 24px auto; max-width: 800px;">
+                <div class="summary-title">Account Balance (<?= htmlspecialchars(get_academic_year($pdo)) ?>)</div>
+                <div class="summary-row">
+                    <span class="summary-label">Total Assessed</span>
+                    <span class="summary-value due">₱<?= number_format($totalDue, 2) ?></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Total Paid</span>
+                    <span class="summary-value paid">₱<?= number_format($totalPaid, 2) ?></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Outstanding Balance</span>
+                    <span class="summary-value balance <?= $balance > 0 ? 'due' : '' ?>">₱<?= number_format($balance, 2) ?></span>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <section class="content-grid">
             <article class="panel panel-wide">
                 <div class="panel-heading"><div><span class="eyebrow">Financial</span><h2>Statement of Account</h2></div></div>
-
-                <?php if ($student): ?>
-                    <!-- Balance Summary -->
-                    <div class="student-balance-summary" style="margin-bottom: 24px;">
-                        <div class="summary-title">Account Balance (<?= htmlspecialchars(get_academic_year($pdo)) ?>)</div>
-                        <?php
-                        $totalDue = array_sum(array_column($ledger, 'amount_due'));
-                        $totalPaid = array_sum(array_column($ledger, 'amount_paid'));
-                        $balance = $totalDue - $totalPaid;
-                        ?>
-                        <div class="summary-row">
-                            <span class="summary-label">Total Assessed</span>
-                            <span class="summary-value due">₱<?= number_format($totalDue, 2) ?></span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="summary-label">Total Paid</span>
-                            <span class="summary-value paid">₱<?= number_format($totalPaid, 2) ?></span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="summary-label">Outstanding Balance</span>
-                            <span class="summary-value balance <?= ($totalDue - $totalPaid) > 0 ? 'due' : '' ?>">₱<?= number_format($totalDue - $totalPaid, 2) ?></span>
-                        </div>
-                    </div>
-                <?php endif; ?>
 
                 <?php if (empty($ledger)): ?>
                     <div class="empty-state">
@@ -96,15 +96,15 @@ require dirname(__DIR__) . '/includes/header.php';
                             <div class="balance-cards" style="margin-bottom: 16px;">
                                 <div class="balance-card">
                                     <div class="card-label">Total Assessed</div>
-                                    <div class="card-value">₱<?= number_format(array_sum(array_column($entries, 'amount_due')), 2) ?></div>
+                                    <div class="card-value">₱<?= number_format($ayDue, 2) ?></div>
                                 </div>
                                 <div class="balance-card">
                                     <div class="card-label">Total Paid</div>
-                                    <div class="card-value positive">₱<?= number_format(array_sum(array_column($entries, 'amount_paid')), 2) ?></div>
+                                    <div class="card-value positive">₱<?= number_format($ayPaid, 2) ?></div>
                                 </div>
                                 <div class="balance-card">
                                     <div class="card-label">Balance</div>
-                                    <div class="card-value balance <?= (array_sum(array_column($entries, 'amount_due')) - array_sum(array_column($entries, 'amount_paid'))) > 0 ? 'due' : '' ?>">₱<?= number_format(array_sum(array_column($entries, 'amount_due')) - array_sum(array_column($entries, 'amount_paid')), 2) ?></div>
+                                    <div class="card-value <?= $ayBalance > 0 ? 'due' : '' ?>">₱<?= number_format($ayBalance, 2) ?></div>
                                 </div>
                             </div>
 

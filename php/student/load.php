@@ -25,7 +25,7 @@ try {
             WHERE student_id = :sid
             ORDER BY semester, subject_code
         ");
-        $stmt->execute(['sid' => $student['student_number']]);
+        $stmt->execute(['sid' => $student['id']]);
         $courses = $stmt->fetchAll();
     }
 } catch (PDOException $e) {
@@ -41,7 +41,7 @@ require dirname(__DIR__) . '/includes/header.php';
     <main class="main-content">
         <header class="topbar">
             <div><span class="eyebrow">Student workspace</span><h1>Welcome, <?= htmlspecialchars(explode(' ', $_SESSION['user']['full_name'])[0], ENT_QUOTES, 'UTF-8') ?>.</h1></div>
-            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars($academicYear) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
+            <div class="topbar-actions"><span class="year-pill"><?= htmlspecialchars(get_academic_year($pdo)) ?></span><a class="avatar" href="#" onclick="return openLogoutModal()" title="Sign out"><?= strtoupper(substr((string) $_SESSION['user']['full_name'], 0, 1)) ?></a></div>
         </header>
         <section class="content-grid">
             <article class="panel panel-wide">
@@ -61,25 +61,26 @@ require dirname(__DIR__) . '/includes/header.php';
                                     <th>Units</th>
                                     <th>Semester</th>
                                     <th>Status</th>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($courses as $course): ?>
+                                <tr>
+                                    <td><strong><?= htmlspecialchars($course['subject_code']) ?></strong></td>
+                                    <td><?= htmlspecialchars($course['subject_name']) ?></td>
+                                    <td style="text-align: center;"><?= (int) $course['units'] ?></td>
+                                    <td><?= htmlspecialchars($course['semester']) ?></td>
+                                    <td>
+                                        <span class="status-badge status-<?= $course['status'] === 'enrolled' ? 'paid' : ($course['status'] === 'pending' ? 'partial' : 'unpaid') ?>" style="font-size: 11px; text-transform: capitalize;">
+                                            <?= htmlspecialchars(ucfirst($course['status'])) ?>
+                                        </span>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($courses as $course): ?>
-                                    <tr>
-                                        <td><strong><?= htmlspecialchars($course['subject_code']) ?></strong></td>
-                                        <td><?= htmlspecialchars($course['subject_name']) ?></td>
-                                        <td style="text-align: center;"><?= (int) $course['units'] ?></td>
-                                        <td><?= htmlspecialchars($course['semester']) ?></td>
-                                        <td>
-                                            <span class="status-badge status-<?= $course['status'] === 'enrolled' ? 'paid' : ($course['status'] === 'pending' ? 'partial' : 'unpaid') ?>" style="font-size: 11px; text-transform: capitalize;">
-                                                <?= htmlspecialchars(ucfirst($course['status'])) ?>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
                 <?php endif; ?>
             </article>
         </section>

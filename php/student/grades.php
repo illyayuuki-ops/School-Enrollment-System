@@ -19,11 +19,10 @@ try {
     $student = $stmt->fetch();
 
     if ($student) {
-        // Get grades grouped by academic year and semester
         $stmt = $pdo->prepare("
             SELECT sg.*, 
                    CASE 
-                       WHEN final_grade IN ('1.0','1.25','1.5','1.75','2.0','2.25','2.5','2.75','3.0') THEN 'passed'
+                       WHEN final_grade IN ('1.0','1.25','1.5','1.75','2.0','2.25','2.25','2.5','2.75','3.0') THEN 'passed'
                        WHEN final_grade IN ('3.5','4.0','5.0','INC','DROPPED') THEN 'failed'
                        ELSE 'pending'
                    END as grade_status

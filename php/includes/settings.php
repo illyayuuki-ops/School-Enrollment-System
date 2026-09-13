@@ -27,80 +27,15 @@ function get_setting(PDO $pdo, string $key, ?string $default = null): ?string
 }
 
 /**
- * Get multiple settings at once.
+ * Get formatted academic year label.
  * 
  * @param PDO $pdo Database connection
- * @param array $keys Array of setting keys
- * @param array $defaults Default values for each key
- * @return array Associative array of key => value
+ * @return string Formatted label (e.g. "A.Y. 2026-2027")
  */
-function get_settings(PDO $pdo, array $keys, array $defaults = []): array
+function academic_year_label(PDO $pdo): string
 {
-    $result = $defaults;
-    if (empty($keys)) {
-        return $result;
-    }
-    
-    try {
-        $placeholders = implode(',', array_fill(0, count($keys), '?'));
-        $stmt = $pdo->prepare("SELECT `key`, value FROM app_settings WHERE `key` IN ($placeholders)");
-        $stmt->execute($keys);
-        while ($row = $stmt->fetch()) {
-            $result[$row['key']] = (string) $row['value'];
-        }
-    } catch (PDOException $e) {
-        error_log('get_settings error: ' . $e->getMessage());
-    }
-    
-    return $result;
-}
-
-/**
- * Get the current academic year from app_settings.
- * 
- * @param PDO $pdo Database connection
- * @return string Academic year (e.g. '2026-2027')
- */
-function get_academic_year(PDO $pdo): string
-{
-    return get_setting($pdo, 'academic_year', '2026-2027');
-}
-
-/**
- * Get the current school name from app_settings.
- * 
- * @param PDO $pdo Database connection
- * @return string School name
- */
-function get_school_name(PDO $pdo): string
-{
-    return get_setting($pdo, 'school_name', 'Steiner Maris Academy');
-}
-
-/**
- * Check if registration is open.
- * 
- * @param PDO $pdo Database connection
- * @return bool True if registration is open
- */
-function is_registration_open(PDO $pdo): bool
-{
-    $value = get_setting($pdo, 'registration_open', '1');
-    return $value === '1' || $value === 'true' || $value === 'on';
-}
-
-/**
- * Check if a level type is active for the current academic year.
- * 
- * @param PDO $pdo Database connection
- * @param string $levelType Level type (BED, College, TESDA)
- * @return bool True if active
- */
-function is_level_active(PDO $pdo, string $levelType): bool
-{
-    $key = 'level_active_' . $levelType;
-    $value = get_setting($pdo, $key, '1');
-    return $value === '1' || $value === 'true' || $value === 'on';
+    $year = get_setting($pdo, 'academic_year', '2026-2027');
+    return 'A.Y. ' . $year;
 }
 
 /**
@@ -120,16 +55,4 @@ function get_default_semester(PDO $pdo): string
         error_log('get_default_semester error: ' . $e->getMessage());
         return '1st Semester';
     }
-}
-
-/**
- * Get formatted academic year label.
- * 
- * @param PDO $pdo Database connection
- * @return string Formatted label (e.g. "A.Y. 2026-2027")
- */
-function academic_year_label(PDO $pdo): string
-{
-    $year = get_academic_year($pdo);
-    return 'A.Y. ' . $year;
 }

@@ -84,7 +84,7 @@ if ($action === 'approve') {
                         <form method="post" action="/admission/process_application.php" class="approval-form">
                             <input type="hidden" name="id" value="<?= (int) $application['id'] ?>">
                             <input type="hidden" name="action" value="approve">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
                             <div class="form-grid">
                                 <div class="form-field">

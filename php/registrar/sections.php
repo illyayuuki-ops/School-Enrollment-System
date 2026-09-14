@@ -111,7 +111,7 @@ require dirname(__DIR__) . '/includes/header.php';
                     <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--navy);">Create Section</h3>
                     <form method="post" action="/registrar/process_section.php" class="user-form-inner">
                         <input type="hidden" name="action" value="create">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
                         <div class="form-grid">
                             <div class="form-field">
@@ -227,7 +227,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                                         <form method="post" action="/registrar/process_section.php" style="display: inline;">
                                                             <input type="hidden" name="action" value="unassign_student">
                                                             <input type="hidden" name="student_id" value="<?= (int) $s['id'] ?>">
-                                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                                             <button type="submit" class="btn-suspend" onclick="return confirm('Unassign this student from the section?');" style="padding: 4px 10px; font-size: 11px;">Unassign</button>
                                                         </form>
                                                     </td>
@@ -239,10 +239,10 @@ require dirname(__DIR__) . '/includes/header.php';
                             </div>
                             <!-- Assign Student Form -->
                             <?php if (count($sectionStudents) < (int)$section['capacity']): ?>
-                                <form method="post" action="/registrar/process_section.php" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: end;">
-                                    <input type="hidden" name="action" value="assign_student">
-                                    <input type="hidden" name="section_id" value="<?= (int) $section['id'] ?>">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+<form method="post" action="/registrar/process_section.php" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: end;">
+                                <input type="hidden" name="action" value="assign_student">
+                                <input type="hidden" name="section_id" value="<?= (int) $section['id'] ?>">
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                     <div class="form-field" style="flex: 1; min-width: 200px;">
                                         <label for="student_id_<?= (int) $section['id'] ?>" class="eyebrow">Assign Student</label>
                                         <select id="student_id_<?= (int) $section['id'] ?>" name="student_id" required style="height: 40px;">

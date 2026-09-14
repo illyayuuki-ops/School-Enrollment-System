@@ -34,14 +34,6 @@
 
 <script>
 (function () {
-    var logoutLinks = document.querySelectorAll('a[href="/logout.php"], a[href="/logout.php?"]');
-    logoutLinks.forEach(function (link) {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            openLogoutModal();
-        });
-    });
-
     window.openLogoutModal = function () {
         document.getElementById('logoutModal').style.display = 'flex';
     };

@@ -113,7 +113,7 @@ $today = (new DateTime())->format('F j, Y');
                     <?php endif; ?>
 
                     <form method="post" action="/register_submit.php" novalidate id="enrollment-form" class="enrollment-form">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
                         <div class="form-section">
                             <h3>Program Selection</h3>

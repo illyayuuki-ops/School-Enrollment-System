@@ -7,6 +7,11 @@ session_start([
     'cookie_secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
 ]);
 
+// Ensure CSRF token exists for all authenticated pages
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 const SESSION_IDLE_LIMIT = 600; // 10 minutes in seconds
 
 function home_for_role(string $role): string

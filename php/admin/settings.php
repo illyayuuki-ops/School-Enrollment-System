@@ -127,7 +127,7 @@ require dirname(__DIR__) . '/includes/header.php';
                 <?php endif; ?>
 
                 <form method="post" action="/admin/settings.php" class="settings-form">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="form-grid">
                         <div class="form-field">

@@ -167,7 +167,7 @@ $pageTitle = 'Verify Login';
                     <?php endif; ?>
 
                     <form method="post" action="/verify_otp.php" novalidate id="verify-form">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <input type="hidden" name="action" value="verify">
 
                         <div class="form-field">

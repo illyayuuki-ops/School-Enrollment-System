@@ -180,7 +180,7 @@ require dirname(__DIR__) . '/includes/header.php';
 
                 <?php if ($selectedSubject && !$error): ?>
                     <form method="post" action="/teacher/grades.php" class="grade-form" style="margin-top: 16px;">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <input type="hidden" name="subject" value="<?= htmlspecialchars($selectedSubject) ?>">
 
                         <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 16px;">

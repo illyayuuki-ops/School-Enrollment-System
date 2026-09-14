@@ -266,7 +266,7 @@ require dirname(__DIR__) . '/includes/header.php';
                         <form method="post" action="/admission/process_application.php" style="display: inline;" onsubmit="return confirm('Reject this application?');">
                             <input type="hidden" name="id" value="<?= htmlspecialchars($application['id'] ?? '') ?>">
                             <input type="hidden" name="action" value="reject">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                             <button type="submit" class="btn-reject">Reject</button>
                         </form>
                     </div>

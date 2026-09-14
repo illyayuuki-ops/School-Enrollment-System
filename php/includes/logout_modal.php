@@ -8,17 +8,3 @@
         </div>
     </div>
 </div>
-
-<script>
-function openLogoutModal() {
-    document.getElementById('logoutModal').style.display = 'flex';
-}
-
-function closeLogoutModal() {
-    document.getElementById('logoutModal').style.display = 'none';
-}
-
-document.getElementById('logoutModal').addEventListener('click', function(e) {
-    if (e.target === this) closeLogoutModal();
-});
-</script>

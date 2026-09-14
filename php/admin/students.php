@@ -84,7 +84,7 @@ require dirname(__DIR__) . '/includes/header.php';
                     <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--navy);">Create Student Record</h3>
                     <form method="post" action="/admin/process_student.php" class="user-form-inner">
                         <input type="hidden" name="action" value="create">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
                         <div class="form-grid">
                             <div class="form-field">
@@ -208,12 +208,12 @@ require dirname(__DIR__) . '/includes/header.php';
                                         <td style="text-align: center;">
                                             <div class="action-buttons">
                                                 <button type="button" class="btn-edit" onclick="openEditModal(<?= (int) $s['id'] ?>, '<?= htmlspecialchars($s['student_number'], ENT_QUOTES) ?>', '<?= htmlspecialchars($s['full_name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($s['program'], ENT_QUOTES) ?>', '<?= htmlspecialchars($s['year_level'], ENT_QUOTES) ?>', '<?= htmlspecialchars($s['enrollment_status'], ENT_QUOTES) ?>', '<?= htmlspecialchars($s['school_email'] ?? '', ENT_QUOTES) ?>', '<?= htmlspecialchars($s['level_type'] ?? '', ENT_QUOTES) ?>', '<?= $s['active_this_year'] ? '1' : '0' ?>')" style="padding: 4px 10px; font-size: 11px;">Edit</button>
-                                                <form method="post" action="/admin/process_student.php" style="display: inline;">
-                                                    <input type="hidden" name="action" value="delete">
-                                                    <input type="hidden" name="id" value="<?= (int) $s['id'] ?>">
-                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-                                                    <button type="submit" class="btn-suspend" onclick="return confirm('Are you sure you want to delete this student record? This action cannot be undone.');" style="padding: 4px 10px; font-size: 11px;">Delete</button>
-                                                </form>
+<form method="post" action="/admin/process_student.php" style="display: inline;">
+                                                     <input type="hidden" name="action" value="delete">
+                                                     <input type="hidden" name="id" value="<?= (int) $s['id'] ?>">
+                                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                                     <button type="submit" class="btn-suspend" onclick="return confirm('Are you sure you want to delete this student record? This action cannot be undone.');" style="padding: 4px 10px; font-size: 11px;">Delete</button>
+                                                 </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -246,7 +246,7 @@ require dirname(__DIR__) . '/includes/header.php';
         <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: var(--navy);">Edit Student</h3>
         <form method="post" action="/admin/process_student.php" id="editForm">
             <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="id" id="edit_id">
             <div class="form-grid" style="display: grid; grid-template-columns: 1fr; gap: 14px;">
                 <div class="form-field">

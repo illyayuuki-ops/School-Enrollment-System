@@ -279,7 +279,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                                             <input type="hidden" name="id" value="<?= (int) $l['id'] ?>">
                                                             <input type="hidden" name="student_id" value="<?= (int) $studentInfo['id'] ?>">
                                                             <input type="hidden" name="student_number" value="<?= htmlspecialchars($studentInfo['student_number']) ?>">
-                                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                                             <button type="submit" class="btn-suspend" style="padding: 4px 10px; font-size: 11px;">Delete</button>
                                                         </form>
                                                     </div>
@@ -296,7 +296,7 @@ require dirname(__DIR__) . '/includes/header.php';
                             <h4 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--navy);">Add New Ledger Entry</h4>
                             <form method="post" action="/registrar/process_payment.php" class="user-form" style="max-width: 600px;">
                                 <input type="hidden" name="action" value="create_ledger">
-                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                 <input type="hidden" name="student_id" value="<?= (int) $studentInfo['id'] ?>">
                                 <input type="hidden" name="student_number" value="<?= htmlspecialchars($studentInfo['student_number']) ?>">
 
@@ -339,7 +339,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                 <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: var(--navy);">Record Payment</h3>
                                 <form method="post" action="/registrar/process_payment.php" id="recordPaymentForm">
                                     <input type="hidden" name="action" value="record_payment">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="ledger_id" id="rp_ledger_id">
                                     <input type="hidden" name="student_id" id="rp_student_id">
                                     <input type="hidden" name="student_number" id="rp_student_number">
@@ -376,7 +376,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                 <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: var(--navy);">Edit Ledger Entry</h3>
                                 <form method="post" action="/registrar/process_payment.php" id="editLedgerForm">
                                     <input type="hidden" name="action" value="edit_ledger">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="id" id="edit_ledger_id">
                                     <input type="hidden" name="student_id" id="edit_ledger_student_id">
                                     <input type="hidden" name="student_number" id="edit_ledger_student_number">

@@ -95,7 +95,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
                         <?php endif; ?>
 
                         <form method="post" action="/process_login.php" novalidate>
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                             <input type="hidden" name="user_role" value="<?= htmlspecialchars($role, ENT_QUOTES, 'UTF-8') ?>">
 
                             <label for="email">Email / User ID</label>

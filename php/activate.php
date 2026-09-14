@@ -170,7 +170,7 @@ $pageTitle = 'Activate Account';
 
                     <?php if ($showForm): ?>
                         <form method="post" action="/activate.php" novalidate id="activate-form">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                             <input type="hidden" name="action" value="verify">
 
                             <div class="form-field">

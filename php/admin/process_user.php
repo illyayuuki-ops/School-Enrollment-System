@@ -27,10 +27,15 @@ try {
         $password = (string) ($_POST['password'] ?? '');
         $schoolEmail = trim((string) ($_POST['school_email'] ?? ''));
         $levelType = (string) ($_POST['level_type'] ?? '');
+        $schoolEmail = ($schoolEmail === '') ? null : $schoolEmail;
+        $levelType = ($levelType === '') ? null : $levelType;
+        if ($role !== 'student') {
+            $levelType = null;
+        }
         $activeThisYear = isset($_POST['active_this_year']) ? '1' : '0';
 
         $allowedRoles = ['admin', 'admission', 'registrar', 'teacher', 'student'];
-        $allowedLevelTypes = ['BED', 'College', 'TESDA', ''];
+        $allowedLevelTypes = ['BED', 'College', 'TESDA', '', null];
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $fullName === '' || !in_array($role, $allowedRoles, true) || !in_array($levelType, $allowedLevelTypes, true)) {
             header('Location: /admin/users.php?error=validation');
             exit;
@@ -72,11 +77,16 @@ try {
         $status = (string) ($_POST['status'] ?? '');
         $schoolEmail = trim((string) ($_POST['school_email'] ?? ''));
         $levelType = (string) ($_POST['level_type'] ?? '');
+        $schoolEmail = ($schoolEmail === '') ? null : $schoolEmail;
+        $levelType = ($levelType === '') ? null : $levelType;
+        if ($role !== 'student') {
+            $levelType = null;
+        }
         $activeThisYear = isset($_POST['active_this_year']) ? '1' : '0';
 
         $allowedRoles = ['admin', 'admission', 'registrar', 'teacher', 'student'];
         $allowedStatuses = ['active', 'suspended'];
-        $allowedLevelTypes = ['BED', 'College', 'TESDA', ''];
+        $allowedLevelTypes = ['BED', 'College', 'TESDA', '', null];
 
         if (!$id || !filter_var($email, FILTER_VALIDATE_EMAIL) || $fullName === '' || !in_array($role, $allowedRoles, true) || !in_array($status, $allowedStatuses, true) || !in_array($levelType, $allowedLevelTypes, true)) {
             header('Location: /admin/users.php?error=validation');

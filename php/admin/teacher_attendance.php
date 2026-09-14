@@ -175,7 +175,7 @@ require dirname(__DIR__) . '/includes/header.php';
                 <div class="user-form" style="margin-bottom: 24px;">
                     <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--navy);">Record Attendance</h3>
                     <form method="post" action="/admin/process_teacher_attendance.php" class="user-form-inner">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <div class="form-grid">
                             <div class="form-field">
                                 <label for="teacher_id">Teacher *</label>
@@ -365,7 +365,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                                 <form method="post" action="/admin/process_teacher_attendance.php" style="display: inline;" onsubmit="return confirm('Delete this attendance record?');">
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="id" value="<?= (int) $a['id'] ?>">
-                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                                     <button type="submit" class="btn-suspend" style="padding: 4px 10px; font-size: 11px;">Delete</button>
                                                 </form>
                                             </div>
@@ -400,7 +400,7 @@ require dirname(__DIR__) . '/includes/header.php';
         <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: var(--navy);">Edit Attendance Record</h3>
         <form method="post" action="/admin/process_teacher_attendance.php" id="editAttendanceForm">
             <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="id" id="edit_attendance_id">
             <div class="form-grid" style="display: grid; grid-template-columns: 1fr; gap: 14px;">
                 <div class="form-field">

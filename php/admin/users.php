@@ -110,7 +110,7 @@ require dirname(__DIR__) . '/includes/header.php';
                     <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--navy);">Create New User</h3>
                     <form method="post" action="/admin/process_user.php" class="user-form-inner">
                         <input type="hidden" name="action" value="create">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
                         <div class="form-grid">
                             <div class="form-field">
@@ -140,7 +140,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                 <label for="school_email">School Email</label>
                                 <input type="email" id="school_email" name="school_email" placeholder="user@sma.edu.ph" style="height: 40px;">
                             </div>
-                            <div class="form-field">
+                            <div class="form-field" id="create_level_type_field" style="display:none;">
                                 <label for="level_type">Level Type</label>
                                 <select id="level_type" name="level_type" style="height: 40px;">
                                     <option value="">-- Select Level Type --</option>
@@ -149,7 +149,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                     <option value="TESDA">TESDA</option>
                                 </select>
                             </div>
-                            <div class="form-field" style="align-items: flex-end;">
+                            <div class="form-field" id="create_active_year_field" style="display:none;">
                                 <label for="active_this_year">Active This Year</label>
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <input type="checkbox" id="active_this_year" name="active_this_year" value="1" checked>
@@ -243,32 +243,32 @@ require dirname(__DIR__) . '/includes/header.php';
                                         <td style="text-align: center;">
                                             <div class="action-buttons">
                                                 <button type="button" class="btn-edit" onclick="openEditModal(<?= (int) $u['id'] ?>, '<?= htmlspecialchars($u['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['full_name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['role'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['status'], ENT_QUOTES) ?>', '<?= htmlspecialchars($u['school_email'] ?? '', ENT_QUOTES) ?>', '<?= htmlspecialchars($u['level_type'] ?? '', ENT_QUOTES) ?>', '<?= $u['active_this_year'] ? '1' : '0' ?>')" style="padding: 4px 10px; font-size: 11px;">Edit</button>
-                                                <form method="post" action="/admin/process_user.php" style="display: inline;">
-                                                    <input type="hidden" name="action" value="reset_password">
-                                                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
-                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-                                                    <button type="submit" class="btn-edit" onclick="return confirm('Reset password for this user? A new temporary password will be generated.');" style="padding: 4px 10px; font-size: 11px;">Reset Password</button>
-                                                </form>
-                                                <form method="post" action="/admin/process_user.php" style="display: inline;">
-                                                    <input type="hidden" name="action" value="force_activate">
-                                                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
-                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-                                                    <button type="submit" class="btn-edit" style="padding: 4px 10px; font-size: 11px;" onclick="return confirm('Force activate this user account?');">Activate</button>
-                                                </form>
-                                                <form method="post" action="/admin/process_user.php" style="display: inline;">
-                                                    <input type="hidden" name="action" value="toggle_status">
-                                                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
-                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-                                                    <button type="submit" class="<?= $u['status'] === 'active' ? 'btn-suspend' : 'btn-reactivate' ?>" onclick="return confirm('Are you sure you want to <?= $u['status'] === 'active' ? 'suspend' : 'reactivate' ?> this user?');" style="padding: 4px 10px; font-size: 11px;">
-                                                        <?= $u['status'] === 'active' ? 'Suspend' : 'Reactivate' ?>
-                                                    </button>
-                                                </form>
-                                                <form method="post" action="/admin/process_user.php" style="display: inline;">
-                                                    <input type="hidden" name="action" value="delete">
-                                                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
-                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-                                                    <button type="submit" class="btn-suspend" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');" style="padding: 4px 10px; font-size: 11px;">Delete</button>
-                                                </form>
+<form method="post" action="/admin/process_user.php" style="display: inline;">
+                                                     <input type="hidden" name="action" value="reset_password">
+                                                     <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                                     <button type="submit" class="btn-edit" onclick="return confirm('Reset password for this user? A new temporary password will be generated.');" style="padding: 4px 10px; font-size: 11px;">Reset Password</button>
+                                                 </form>
+                                                 <form method="post" action="/admin/process_user.php" style="display: inline;">
+                                                     <input type="hidden" name="action" value="force_activate">
+                                                     <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                                     <button type="submit" class="btn-edit" style="padding: 4px 10px; font-size: 11px;" onclick="return confirm('Force activate this user account?');">Activate</button>
+                                                 </form>
+                                                 <form method="post" action="/admin/process_user.php" style="display: inline;">
+                                                     <input type="hidden" name="action" value="toggle_status">
+                                                     <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                                     <button type="submit" class="<?= $u['status'] === 'active' ? 'btn-suspend' : 'btn-reactivate' ?>" onclick="return confirm('Are you sure you want to <?= $u['status'] === 'active' ? 'suspend' : 'reactivate' ?> this user?');" style="padding: 4px 10px; font-size: 11px;">
+                                                         <?= $u['status'] === 'active' ? 'Suspend' : 'Reactivate' ?>
+                                                     </button>
+                                                 </form>
+                                                 <form method="post" action="/admin/process_user.php" style="display: inline;">
+                                                     <input type="hidden" name="action" value="delete">
+                                                     <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                                     <button type="submit" class="btn-suspend" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');" style="padding: 4px 10px; font-size: 11px;">Delete</button>
+                                                 </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -301,7 +301,7 @@ require dirname(__DIR__) . '/includes/header.php';
         <h3 style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: var(--navy);">Edit User</h3>
         <form method="post" action="/admin/process_user.php" id="editForm">
             <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="id" id="edit_id">
             <div class="form-grid" style="display: grid; grid-template-columns: 1fr; gap: 14px;">
                 <div class="form-field">
@@ -333,7 +333,7 @@ require dirname(__DIR__) . '/includes/header.php';
                     <label for="edit_school_email">School Email</label>
                     <input type="email" id="edit_school_email" name="school_email" placeholder="user@sma.edu.ph" style="height: 40px;">
                 </div>
-                <div class="form-field">
+                <div class="form-field" id="edit_level_type_field" style="display:none;">
                     <label for="edit_level_type">Level Type</label>
                     <select id="edit_level_type" name="level_type" style="height: 40px;">
                         <option value="">-- Select Level Type --</option>
@@ -342,7 +342,7 @@ require dirname(__DIR__) . '/includes/header.php';
                         <option value="TESDA">TESDA</option>
                     </select>
                 </div>
-                <div class="form-field" style="align-items: flex-end;">
+                <div class="form-field" id="edit_active_year_field" style="display:none;">
                     <label for="edit_active_this_year">Active This Year</label>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" id="edit_active_this_year" name="active_this_year" value="1">
@@ -368,6 +368,7 @@ function openEditModal(id, email, fullName, role, status, schoolEmail, levelType
     document.getElementById('edit_school_email').value = schoolEmail || '';
     document.getElementById('edit_level_type').value = levelType || '';
     document.getElementById('edit_active_this_year').checked = activeThisYear === '1';
+    toggleRoleFields();
     document.getElementById('editModal').style.display = 'flex';
 }
 
@@ -375,9 +376,28 @@ function closeEditModal() {
     document.getElementById('editModal').style.display = 'none';
 }
 
+function toggleRoleFields() {
+    var createRole = document.getElementById('role');
+    var editRole = document.getElementById('edit_role');
+    var createStudent = createRole && createRole.value === 'student';
+    var editStudent = editRole && editRole.value === 'student';
+    var createLvl = document.getElementById('create_level_type_field');
+    var createAct = document.getElementById('create_active_year_field');
+    var editLvl = document.getElementById('edit_level_type_field');
+    var editAct = document.getElementById('edit_active_year_field');
+    if (createLvl) createLvl.style.display = createStudent ? '' : 'none';
+    if (createAct) createAct.style.display = createStudent ? '' : 'none';
+    if (editLvl) editLvl.style.display = editStudent ? '' : 'none';
+    if (editAct) editAct.style.display = editStudent ? '' : 'none';
+}
+
 document.getElementById('editModal').addEventListener('click', function(e) {
     if (e.target === this) closeEditModal();
 });
+
+document.getElementById('role').addEventListener('change', toggleRoleFields);
+document.getElementById('edit_role').addEventListener('change', toggleRoleFields);
+toggleRoleFields();
 </script>
 
 <?php require dirname(__DIR__) . '/includes/footer.php'; ?>

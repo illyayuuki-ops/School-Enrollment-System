@@ -8,6 +8,11 @@ $roleHome = $role === 'guest'
 require_once dirname(__DIR__) . '/includes/settings.php';
 
 $academicYearLabel = academic_year_label($pdo);
+
+// Determine current page for active navigation highlighting
+$currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+$currentPath = rtrim($currentPath, '/');
+
 $navigation = [
     'admin' => [
         ['label' => 'Dashboard', 'href' => $roleHome],
@@ -49,6 +54,18 @@ $navigation = [
         ['label' => 'FAQ', 'href' => '/student/faq.php'],
     ],
 ][$role] ?? [['label' => 'Sign In', 'href' => '/login/student.php']];
+
+// Helper to determine if a nav item is active
+function is_active_nav(string $href, string $currentPath, string $roleHome): bool {
+    $hrefPath = parse_url($href, PHP_URL_PATH) ?? '';
+    $hrefPath = rtrim($hrefPath, '/');
+    // Dashboard ($roleHome) is only active on exact match
+    if ($hrefPath === $roleHome) {
+        return $hrefPath === $currentPath;
+    }
+    // Other items: match if current path starts with the item's path
+    return str_starts_with($currentPath, $hrefPath);
+}
 ?>
 <aside class="sidebar">
     <a class="brand" href="<?= htmlspecialchars($roleHome, ENT_QUOTES, 'UTF-8') ?>" aria-label="Steiner Maris Academy SMA Portal">
@@ -61,7 +78,8 @@ $navigation = [
     </div>
     <nav aria-label="Main navigation">
         <?php foreach ($navigation as $item): ?>
-            <a class="nav-link" href="<?= htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8') ?>">
+            <?php $active = is_active_nav($item['href'], $currentPath, $roleHome); ?>
+            <a class="nav-link<?= $active ? ' active' : '' ?>" href="<?= htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8') ?>">
                 <span class="nav-dot" aria-hidden="true"></span>
                 <?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>
             </a>

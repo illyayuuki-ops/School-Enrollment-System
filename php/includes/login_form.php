@@ -1,6 +1,15 @@
 <?php
 require_once dirname(__DIR__) . '/includes/settings.php';
 
+// Attempt safe database connection for academic_year_label
+$pdo = null;
+try {
+    require_once dirname(__DIR__) . '/db_connect.php';
+    $pdo = db_connect();
+} catch (Throwable $e) {
+    $pdo = null;
+}
+
 $roleLabels = [
     'student' => 'Student',
     'admin' => 'Administrator',

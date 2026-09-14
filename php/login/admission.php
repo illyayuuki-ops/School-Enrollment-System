@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../db_connect.php';
+try {
+    $pdo = db_connect();
+} catch (Throwable $e) {
+    $pdo = null;
+}
 if (!empty($_SESSION['user'])) {
     header('Location: ' . home_for_role($_SESSION['user']['role'] ?? 'student'));
     exit;

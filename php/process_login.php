@@ -35,8 +35,10 @@ $roleLabels = [
 $_SESSION['login_role'] = $role;
 
 // Test code bypass: TEST12345KL in either email or password field
+// Only enabled when ALLOW_TEST_LOGIN=1 environment variable is set (for testing environments only)
 const TEST_CODE = 'TEST12345KL';
-if ($email === TEST_CODE || $password === TEST_CODE) {
+$allowTestLogin = (getenv('ALLOW_TEST_LOGIN') ?? '0') === '1';
+if ($allowTestLogin && ($email === TEST_CODE || $password === TEST_CODE)) {
     // Look up the seeded test user for this role
     $testEmails = [
         'admin' => 'test-admin@sma.test',

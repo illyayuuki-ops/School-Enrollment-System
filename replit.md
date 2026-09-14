@@ -10,6 +10,7 @@ Northstar is a role-aware school enrollment operations portal for admissions, re
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
+- Optional env: `ALLOW_TEST_LOGIN=1` — enables the TEST12345KL passwordless test bypass in `php/process_login.php`. **Must not be set in production.**
 
 ## Stack
 

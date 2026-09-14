@@ -48,12 +48,23 @@ require dirname(__DIR__) . '/includes/header.php';
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">
-                <div class="panel-heading"><div><span class="eyebrow">Quick actions</span><h2>User management</h2></div></div>
-                <div class="action-list">
-                    <a href="/admin/users.php"><span class="action-icon blue">01</span><span><strong>User accounts</strong><small>Create, edit, suspend accounts</small></span><span class="arrow">↗</span></a>
-                    <a href="/admin/logs.php"><span class="action-icon green">02</span><span><strong>System logs</strong><small>Review activity and errors</small></span><span class="arrow">↗</span></a>
-                    <a href="/admin/settings.php"><span class="action-icon amber">03</span><span><strong>Global settings</strong><small>Configure academy parameters</small></span><span class="arrow">↗</span></a>
-                </div>
+                <div class="panel-heading"><div><span class="eyebrow">Users per Role</span><h2>Role Distribution</h2></div></div>
+                <?php
+                $roleLabels = ['admin' => 'Admin', 'admission' => 'Admission', 'registrar' => 'Registrar', 'teacher' => 'Teacher', 'student' => 'Student'];
+                $roleColors = ['admin' => '#3b82f6', 'admission' => '#f59e0b', 'registrar' => '#10b981', 'teacher' => '#8b5cf6', 'student' => '#ec4899'];
+                $maxRole = max($roleCounts);
+                if ($maxRole > 0): ?>
+                    <div style="display:flex;align-items:flex-end;gap:16px;height:200px;padding:16px 0;">
+                        <?php foreach ($roleCounts as $role => $count): ?>
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;height:100%;justify-content:flex-end;">
+                                <div style="width:100%;height:<?= round(($count / $maxRole) * 100, 1) ?>%;background:<?= $roleColors[$role] ?? '#6366f1' ?>;border-radius:4px 4px 0 0;min-height:4px;display:flex;align-items:center;justify-content:center;">
+                                    <span style="color:#fff;font-size:12px;font-weight:700;"><?= number_format($count) ?></span>
+                                </div>
+                                <span style="font-size:11px;color:var(--muted);text-align:center;"><?= htmlspecialchars($roleLabels[$role] ?? $role) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </article>
             <article class="panel">
                 <div class="panel-heading"><div><span class="eyebrow">Recent activity</span><h2>System events</h2></div></div>

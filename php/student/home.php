@@ -82,20 +82,6 @@ require dirname(__DIR__) . '/includes/header.php';
             <article class="metric-card"><span class="eyebrow">Outstanding balance</span><strong><?= $balance > 0 ? '₱' . number_format($balance, 2) : '—' ?></strong><small><?= $balance > 0 ? 'payment required' : 'no outstanding balance' ?></small></article>
             <article class="metric-card"><span class="eyebrow">GPA</span><strong>—</strong><small>data not available</small></article>
         </section>
-        <section class="content-grid">
-            <article class="panel panel-wide">
-                <div class="panel-heading"><div><span class="eyebrow">Quick actions</span><h2>Student Services</h2></div></div>
-                <div class="action-list">
-                    <a href="/student/enrollment.php"><span class="action-icon blue">01</span><span><strong>Enrollment</strong><small>View enrollment process and steps</small></span><span class="arrow">↗</span></a>
-                    <a href="/student/load.php"><span class="action-icon green">02</span><span><strong>Study Load</strong><small>View enrolled courses and schedule</small></span><span class="arrow">↗</span></a>
-                    <a href="/student/grades.php"><span class="action-icon amber">03</span><span><strong>Grades</strong><small>View grades and academic standing</small></span><span class="arrow">↗</span></a>
-                    <a href="/student/subjects.php"><span class="action-icon amber">04</span><span><strong>Subjects</strong><small>View plan of study</small></span><span class="arrow">↗</span></a>
-                    <a href="/student/statement.php"><span class="action-icon amber">05</span><span><strong>Statement of Account</strong><small>View balance and payment history</small></span><span class="arrow">↗</span></a>
-                    <a href="/student/policies.php"><span class="action-icon amber">06</span><span><strong>Academic Policies</strong><small>View academic handbook</small></span><span class="arrow">↗</span></a>
-                    <a href="/student/faq.php"><span class="action-icon amber">07</span><span><strong>FAQ</strong><small>Frequently asked questions</small></span><span class="arrow">↗</span></a>
-                </div>
-            </article>
-        </section>
     </main>
 </div>
 <?php require dirname(__DIR__) . '/includes/footer.php'; ?>

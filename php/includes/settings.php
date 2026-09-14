@@ -52,6 +52,12 @@ function academic_year_label(?PDO $pdo): string
     return 'A.Y. ' . $year;
 }
 
+function get_school_name(?PDO $pdo): string
+{
+    $name = get_setting($pdo, 'school_name', 'Steiner Maris Academy');
+    return $name;
+}
+
 /**
  * Get the default enrollment semester (first by display_order).
  * 

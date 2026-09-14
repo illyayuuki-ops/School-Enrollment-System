@@ -123,13 +123,27 @@ require dirname(__DIR__) . '/includes/header.php';
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">
-                <div class="panel-heading"><div><span class="eyebrow">Quick actions</span><h2>Teaching Tools</h2></div></div>
-                <div class="action-list">
-                    <a href="/teacher/classes.php"><span class="action-icon blue">01</span><span><strong>Active Classes</strong><small>Manage rosters and schedules</small></span><span class="arrow">↗</span></a>
-                    <a href="/teacher/grades.php"><span class="action-icon green">02</span><span><strong>Grade Encoding</strong><small>Enter and submit grades</small></span><span class="arrow">↗</span></a>
-                    <a href="/teacher/schedule.php"><span class="action-icon amber">03</span><span><strong>Schedule Matrix</strong><small>View weekly timetable</small></span><span class="arrow">↗</span></a>
-                    <a href="/teacher/attendance.php"><span class="action-icon amber">04</span><span><strong>My Attendance</strong><small>View my attendance records</small></span><span class="arrow">↗</span></a>
-                </div>
+                <div class="panel-heading"><div><span class="eyebrow">Attendance Breakdown</span><h2>Present / Absent / Late / Leave</h2></div></div>
+                <?php
+                $attData = [
+                    ['label' => 'Present', 'value' => (int)($attendanceStats['present'] ?? 0), 'color' => 'var(--green)'],
+                    ['label' => 'Absent', 'value' => (int)($attendanceStats['absent'] ?? 0), 'color' => '#dc2626'],
+                    ['label' => 'Late', 'value' => (int)($attendanceStats['late'] ?? 0), 'color' => '#f59e0b'],
+                    ['label' => 'On Leave', 'value' => (int)($attendanceStats['leave'] ?? 0), 'color' => '#6366f1'],
+                ];
+                $maxAtt = max(array_column($attData, 'value'));
+                if ($maxAtt > 0): ?>
+                    <div style="display:flex;align-items:flex-end;gap:16px;height:200px;padding:16px 0;">
+                        <?php foreach ($attData as $item): ?>
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;height:100%;justify-content:flex-end;">
+                                <div style="width:100%;height:<?= round(($item['value'] / $maxAtt) * 100, 1) ?>%;background:<?= $item['color'] ?>;border-radius:4px 4px 0 0;min-height:4px;display:flex;align-items:center;justify-content:center;">
+                                    <span style="color:#fff;font-size:12px;font-weight:700;"><?= number_format($item['value']) ?></span>
+                                </div>
+                                <span style="font-size:11px;color:var(--muted);text-align:center;"><?= htmlspecialchars($item['label']) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </article>
             <article class="panel">
                 <div class="panel-heading"><div><span class="eyebrow">My Attendance (This Month)</span><h2>Attendance Summary</h2></div></div>

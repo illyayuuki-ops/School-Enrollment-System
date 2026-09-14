@@ -71,12 +71,24 @@ require dirname(__DIR__) . '/includes/header.php';
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">
-                <div class="panel-heading"><div><span class="eyebrow">Quick actions</span><h2>Process Applications</h2></div></div>
-                <div class="action-list">
-                    <a href="/admission/queue.php"><span class="action-icon blue">01</span><span><strong>Verification Queue</strong><small>Review pending applications</small></span><span class="arrow">↗</span></a>
-                    <a href="/admission/documents.php"><span class="action-icon green">02</span><span><strong>Document Review</strong><small>Check submitted requirements</small></span><span class="arrow">↗</span></a>
-                    <a href="/admission/queue.php"><span class="action-icon amber">03</span><span><strong>Bulk Actions</strong><small>Approve or request more info</small></span><span class="arrow">↗</span></a>
-                </div>
+                <div class="panel-heading"><div><span class="eyebrow">Applications by Status</span><h2>Status Distribution</h2></div></div>
+                <?php
+                $statusLabels = ['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected'];
+                $statusColors = ['pending' => '#f59e0b', 'approved' => '#22c55e', 'rejected' => '#ef4444'];
+                $statusCounts = ['pending' => $pendingCount, 'approved' => $approvedCount, 'rejected' => $rejectedCount];
+                $maxStatus = max($statusCounts);
+                if ($maxStatus > 0): ?>
+                    <div style="display:flex;align-items:flex-end;gap:16px;height:200px;padding:16px 0;">
+                        <?php foreach ($statusCounts as $status => $count): ?>
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;height:100%;justify-content:flex-end;">
+                                <div style="width:100%;height:<?= round(($count / $maxStatus) * 100, 1) ?>%;background:<?= $statusColors[$status] ?? '#6366f1' ?>;border-radius:4px 4px 0 0;min-height:4px;display:flex;align-items:center;justify-content:center;">
+                                    <span style="color:#fff;font-size:12px;font-weight:700;"><?= number_format($count) ?></span>
+                                </div>
+                                <span style="font-size:11px;color:var(--muted);text-align:center;"><?= htmlspecialchars($statusLabels[$status] ?? $status) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </article>
             <article class="panel">
                 <div class="panel-heading"><div><span class="eyebrow">Recent Activity</span><h2>Application Updates</h2></div></div>

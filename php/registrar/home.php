@@ -54,13 +54,27 @@ require dirname(__DIR__) . '/includes/header.php';
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">
-                <div class="panel-heading"><div><span class="eyebrow">Quick actions</span><h2>Records Management</h2></div></div>
-                <div class="action-list">
-                    <a href="/registrar/students.php"><span class="action-icon blue">01</span><span><strong>Student Masterlist</strong><small>Search and manage records</small></span><span class="arrow">↗</span></a>
-                    <a href="/registrar/sections.php"><span class="action-icon green">02</span><span><strong>Sectioning</strong><small>Assign students to sections</small></span><span class="arrow">↗</span></a>
-                    <a href="/registrar/subjects.php"><span class="action-icon amber">03</span><span><strong>Subject Allocation</strong><small>Manage course offerings</small></span><span class="arrow">↗</span></a>
-                    <a href="/registrar/payments.php"><span class="action-icon blue">04</span><span><strong>Payments / Assessment</strong><small>View balances and ledgers</small></span><span class="arrow">↗</span></a>
-                </div>
+                <div class="panel-heading"><div><span class="eyebrow">Enrollment & Balances</span><h2>Student Overview</h2></div></div>
+                <?php
+                $noBalance = max($totalStudents - $outstandingStudents, 0);
+                $regData = [
+                    ['label' => 'Enrolled', 'value' => $enrolledStudents, 'color' => '#3b82f6'],
+                    ['label' => 'With Balance', 'value' => $outstandingStudents, 'color' => '#ef4444'],
+                    ['label' => 'No Balance', 'value' => $noBalance, 'color' => '#22c55e'],
+                ];
+                $maxReg = max(array_column($regData, 'value'));
+                if ($maxReg > 0): ?>
+                    <div style="display:flex;align-items:flex-end;gap:16px;height:200px;padding:16px 0;">
+                        <?php foreach ($regData as $item): ?>
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;height:100%;justify-content:flex-end;">
+                                <div style="width:100%;height:<?= round(($item['value'] / $maxReg) * 100, 1) ?>%;background:<?= $item['color'] ?>;border-radius:4px 4px 0 0;min-height:4px;display:flex;align-items:center;justify-content:center;">
+                                    <span style="color:#fff;font-size:12px;font-weight:700;"><?= number_format($item['value']) ?></span>
+                                </div>
+                                <span style="font-size:11px;color:var(--muted);text-align:center;"><?= htmlspecialchars($item['label']) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </article>
         </section>
     </main>

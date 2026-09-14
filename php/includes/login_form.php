@@ -111,7 +111,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
 
                             <div class="form-actions">
                                 <button type="button" class="text-button" data-open-forgot>Forgot password?</button>
-                                <button class="button button-primary" type="submit">Sign in <span aria-hidden="true">→</span></button>
+                                <button class="button button-primary" type="submit">Log in <span aria-hidden="true">→</span></button>
                             </div>
                         </form>
 

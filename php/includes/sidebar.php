@@ -53,7 +53,8 @@ $navigation = [
         ['label' => 'Academic Policies', 'href' => '/student/policies.php'],
         ['label' => 'FAQ', 'href' => '/student/faq.php'],
     ],
-][$role] ?? [['label' => 'Sign In', 'href' => '/login/student.php']];
+];
+$navigation = $navigation[$role] ?? [['label' => 'Log in', 'href' => '/login/student.php']];
 
 // Helper to determine if a nav item is active
 function is_active_nav(string $href, string $currentPath, string $roleHome): bool {

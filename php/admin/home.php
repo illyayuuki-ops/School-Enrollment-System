@@ -68,8 +68,33 @@ require dirname(__DIR__) . '/includes/header.php';
             </article>
             <article class="panel">
                 <div class="panel-heading"><div><span class="eyebrow">Recent activity</span><h2>System events</h2></div></div>
+                <?php
+                $recentLogs = [];
+                try {
+                    $stmt = $pdo->prepare("
+                        SELECT l.action, l.detail, l.created_at, u.full_name as actor_name
+                        FROM system_logs l
+                        LEFT JOIN users u ON l.actor_user_id = u.id
+                        ORDER BY l.created_at DESC
+                        LIMIT 8
+                    ");
+                    $stmt->execute();
+                    $recentLogs = $stmt->fetchAll();
+                } catch (PDOException $e) {
+                    // Keep empty on error
+                }
+                ?>
                 <ul class="activity-list">
-                    <li><span class="activity-dot green"></span><span><strong>System ready</strong><small>Admin portal initialized</small></span></li>
+                    <?php if (empty($recentLogs)): ?>
+                        <li><span class="activity-dot green"></span><span><strong>No recent activity</strong></span></li>
+                    <?php else: ?>
+                        <?php foreach ($recentLogs as $log): ?>
+                            <li>
+                                <span class="activity-dot green"></span>
+                                <span><strong><?= htmlspecialchars($log['action'] ?? 'System event') ?></strong><small><?= htmlspecialchars($log['actor_name'] ?? 'System') ?> — <?= date('M d, Y H:i', strtotime($log['created_at'])) ?></small></span>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </ul>
             </article>
         </section>

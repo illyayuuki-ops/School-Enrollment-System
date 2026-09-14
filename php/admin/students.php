@@ -56,6 +56,7 @@ try {
 
 $success = $_GET['success'] ?? '';
 $error = $_GET['error'] ?? '';
+$newPassword = $_GET['new_password'] ?? '';
 
 $pageTitle = 'Student Masterlist';
 $extraStyles = ['/assets/admin.css'];
@@ -74,6 +75,12 @@ require dirname(__DIR__) . '/includes/header.php';
 
                 <?php if ($success): ?>
                     <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+                <?php endif; ?>
+                <?php if ($newPassword): ?>
+                    <div class="alert alert-success" style="margin-top: 12px;">
+                        <strong>New temporary password:</strong> <code><?= htmlspecialchars($newPassword) ?></code>
+                        <p style="margin: 8px 0 0; font-size: 12px; color: var(--muted);">Share this password with the student. They will be prompted to change it on first login.</p>
+                    </div>
                 <?php endif; ?>
                 <?php if ($error): ?>
                     <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
@@ -133,6 +140,10 @@ require dirname(__DIR__) . '/includes/header.php';
                             <div class="form-field">
                                 <label for="school_email">School Email</label>
                                 <input type="email" id="school_email" name="school_email" placeholder="student@sma.edu.ph" style="height: 40px;">
+                            </div>
+                            <div class="form-field">
+                                <label for="password">Temporary Password</label>
+                                <input type="text" id="password" name="password" placeholder="Auto-generated if left blank" style="height: 40px;">
                             </div>
                             <div class="form-field">
                                 <label for="level_type">Level Type</label>

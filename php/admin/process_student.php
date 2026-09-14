@@ -45,17 +45,20 @@ try {
         }
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
+        $schoolEmail = ($schoolEmail === '') ? null : $schoolEmail;
+        $levelType = ($levelType === '') ? null : $levelType;
+
         $pdo->beginTransaction();
         try {
             // Create user
-            $stmt = $pdo->prepare("INSERT INTO users (email, password_hash, full_name, role, status, activated, created_at) VALUES (:email, :phash, :fname, 'student', 'active', TRUE, NOW()) RETURNING id");
-            $stmt->execute(['email' => $email, 'phash' => password_hash($password, PASSWORD_DEFAULT), 'fname' => $fullName]);
+            $stmt = $pdo->prepare("INSERT INTO users (email, password_hash, full_name, role, status, school_email, level_type, active_this_year, created_at) VALUES (:email, :phash, :fname, 'student', 'active', :school_email, :level_type, :active_this_year, NOW()) RETURNING id");
+            $stmt->execute(['email' => $email, 'phash' => $passwordHash, 'fname' => $fullName, 'school_email' => $schoolEmail, 'level_type' => $levelType, 'active_this_year' => $activeThisYear]);
             $userId = $stmt->fetchColumn();
 
             // Create student record
             $stmt = $pdo->prepare("
-                INSERT INTO students (user_id, student_number, enrollment_status, academic_year, program, year_level, school_email, level_type, active_this_year)
-                VALUES (:uid, :sn, :enrollment_status, '2026-2027', :program, :year_level, :school_email, :level_type, :active_this_year)
+                INSERT INTO students (user_id, student_number, enrollment_status, academic_year, program, year_level)
+                VALUES (:uid, :sn, :enrollment_status, '2026-2027', :program, :year_level)
             ");
             $stmt->execute([
                 'uid' => $userId,
@@ -63,9 +66,6 @@ try {
                 'enrollment_status' => $enrollmentStatus,
                 'program' => $program,
                 'year_level' => $yearLevel,
-                'school_email' => $schoolEmail,
-                'level_type' => $levelType,
-                'active_this_year' => $activeThisYear
             ]);
 
             // Log the creation
@@ -74,7 +74,7 @@ try {
             $stmt->execute(['actor' => $_SESSION['user']['id'], 'detail' => $detail]);
 
             $pdo->commit();
-            header('Location: /admin/students.php?success=Student+created+successfully');
+            header('Location: /admin/students.php?success=Student+created+successfully&new_password=' . urlencode($password));
             exit;
         } catch (PDOException $e) {
             $pdo->rollBack();
@@ -94,12 +94,13 @@ try {
         $enrollmentStatus = (string) ($_POST['enrollment_status'] ?? '');
         $schoolEmail = trim((string) ($_POST['school_email'] ?? ''));
         $levelType = (string) ($_POST['level_type'] ?? '');
+        $levelType = ($levelType === '') ? null : $levelType;
         $activeThisYear = isset($_POST['active_this_year']) ? '1' : '0';
 
         $allowedStatuses = ['pending', 'verified', 'enrolled'];
         $allowedLevelTypes = ['BED', 'College', 'TESDA', ''];
 
-        if (!$id || $studentNumber === '' || $fullName === '' || $program === '' || $yearLevel === '' || !in_array($enrollmentStatus, ['pending', 'verified', 'enrolled'], true) || !in_array($levelType, ['BED', 'College', 'TESDA', ''], true)) {
+        if (!$id || $studentNumber === '' || $fullName === '' || $program === '' || $yearLevel === '' || !in_array($enrollmentStatus, ['pending', 'verified', 'enrolled'], true) || !in_array($levelType, ['BED', 'College', 'TESDA', '', null], true)) {
             header('Location: /admin/students.php?error=validation');
             exit;
         }
@@ -139,8 +140,8 @@ try {
 
         $pdo->beginTransaction();
         try {
-            // Get student info for logging
-            $stmt = $pdo->prepare("SELECT s.student_number, u.full_name FROM students s JOIN users u ON s.user_id = u.id WHERE s.id = :id");
+            // Get student info for logging and capture user_id before deleting
+            $stmt = $pdo->prepare("SELECT s.student_number, u.full_name, s.user_id FROM students s JOIN users u ON s.user_id = u.id WHERE s.id = :id");
             $stmt->execute(['id' => $id]);
             $student = $stmt->fetch();
 
@@ -150,13 +151,15 @@ try {
                 exit;
             }
 
-            // Delete student (will cascade to users via foreign key if set, or we need to delete manually)
+            $userId = $student['user_id'];
+
+            // Delete student
             $stmt = $pdo->prepare("DELETE FROM students WHERE id = :id");
             $stmt->execute(['id' => $id]);
 
             // Also delete the user
-            $stmt = $pdo->prepare("DELETE FROM users WHERE id = (SELECT user_id FROM students WHERE id = :id)");
-            $stmt->execute(['id' => $id]);
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = :user_id");
+            $stmt->execute(['user_id' => $userId]);
 
             $stmt = $pdo->prepare("INSERT INTO system_logs (actor_user_id, action, detail, created_at) VALUES (:actor, 'student_deleted', :detail, NOW())");
             $detail = "Deleted student {$student['student_number']} ({$student['full_name']})";

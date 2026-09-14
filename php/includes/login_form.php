@@ -1,4 +1,6 @@
 <?php
+require_once dirname(__DIR__) . '/includes/settings.php';
+
 $roleLabels = [
     'student' => 'Student',
     'admin' => 'Administrator',
@@ -50,10 +52,10 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
                     <span class="eyebrow">SMA Portal</span>
                     <strong>Welcome to your <?= htmlspecialchars($roleLabels[$role], ENT_QUOTES, 'UTF-8') ?> workspace</strong>
                 </div>
-                <div class="portal-topbar-meta">
-                    <span class="secure-chip"><span class="secure-dot" aria-hidden="true"></span>Secure sign-in</span>
-                    <span class="topbar-year">Academic Year 2026–2027</span>
-                </div>
+<div class="portal-topbar-meta">
+                        <span class="secure-chip"><span class="secure-dot" aria-hidden="true"></span>Secure sign-in</span>
+                        <span class="topbar-year"><?= htmlspecialchars(academic_year_label($pdo)) ?></span>
+                    </div>
             </header>
 
             <section class="portal-content">
@@ -64,7 +66,7 @@ $expired = isset($_GET['expired']) && $_GET['expired'] === '1';
                         <p>Sign in with your school credentials to continue to the <?= htmlspecialchars($roleLabels[$role], ENT_QUOTES, 'UTF-8') ?> workspace.</p>
                         <div class="portal-trust-row">
                             <span><span class="trust-mark" aria-hidden="true">✓</span>Private and secure</span>
-                            <span><span class="trust-mark" aria-hidden="true">✓</span>Academic year 2026–2027</span>
+                            <span><span class="trust-mark" aria-hidden="true">✓</span><?= htmlspecialchars(academic_year_label($pdo)) ?></span>
                         </div>
                     </div>
 

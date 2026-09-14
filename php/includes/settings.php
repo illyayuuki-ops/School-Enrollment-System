@@ -27,6 +27,17 @@ function get_setting(PDO $pdo, string $key, ?string $default = null): ?string
 }
 
 /**
+ * Get the academic year label from app_settings.
+ * 
+ * @param PDO $pdo Database connection
+ * @return string Formatted label (e.g. "A.Y. 2026-2027")
+ */
+function get_academic_year(PDO $pdo): string
+{
+    return academic_year_label($pdo);
+}
+
+/**
  * Get formatted academic year label.
  * 
  * @param PDO $pdo Database connection

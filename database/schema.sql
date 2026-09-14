@@ -324,6 +324,11 @@ SELECT s.id, '2026-2027', 'Library Fee', 2000.00, 2000.00, 'paid'
 FROM students s WHERE s.student_number = 'TEST-STU-001'
 ON CONFLICT (student_id, academic_year, description) DO NOTHING;
 
+INSERT INTO student_ledgers (student_id, academic_year, description, amount_due, amount_paid, status)
+SELECT s.id, '2026-2027', 'Miscellaneous Fee', 3000.00, 0.00, 'unpaid'
+FROM students s WHERE s.student_number = 'TEST-STU-001'
+ON CONFLICT (student_id, academic_year, description) DO NOTHING;
+
 -- Seed student courses (using correct integer FK students.id) - simplified seed for test student
 -- MUST RUN BEFORE student_grades and plan_of_study_subjects which JOIN student_courses
 INSERT INTO student_courses (student_id, academic_year, semester, subject_code, subject_name, units, status) VALUES

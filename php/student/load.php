@@ -14,7 +14,7 @@ $academicYear = get_academic_year($pdo);
 $student = null;
 $courses = [];
 try {
-    $stmt = $pdo->prepare("SELECT student_number, program, year_level FROM students WHERE user_id = :uid");
+    $stmt = $pdo->prepare("SELECT id, student_number, program, year_level FROM students WHERE user_id = :uid");
     $stmt->execute(['uid' => $studentId]);
     $student = $stmt->fetch();
 

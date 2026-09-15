@@ -13,6 +13,8 @@ $academicYear = get_academic_year($pdo);
 // Get student record
 $student = null;
 $ledger = [];
+$totalDue = 0.00;
+$totalPaid = 0.00;
 try {
     $stmt = $pdo->prepare("SELECT id, student_number, program, year_level FROM students WHERE user_id = :uid");
     $stmt->execute(['uid' => $studentId]);

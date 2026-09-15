@@ -47,7 +47,10 @@ $navigation = [
     'student' => [
         ['label' => 'Dashboard', 'href' => $roleHome],
         ['label' => 'Profile', 'href' => '/student/profile.php'],
+        ['label' => 'Study Load', 'href' => '/student/load.php'],
+        ['label' => 'Application Status', 'href' => '/student/status.php'],
         ['label' => 'Statement of Account', 'href' => '/student/statement.php'],
+        ['label' => 'Enrollment', 'href' => '/student/enrollment.php'],
         ['label' => 'Grades', 'href' => '/student/grades.php'],
         ['label' => 'Subjects', 'href' => '/student/subjects.php'],
         ['label' => 'Academic Policies', 'href' => '/student/policies.php'],

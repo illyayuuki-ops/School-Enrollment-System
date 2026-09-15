@@ -16,6 +16,7 @@ $ledger = [];
 $totalDue = 0.00;
 $totalPaid = 0.00;
 $enrolledCourses = 0;
+$gpa = null;
 try {
     $stmt = $pdo->prepare("SELECT id, student_number, program, year_level FROM students WHERE user_id = :uid");
     $stmt->execute(['uid' => $studentId]);
@@ -39,6 +40,22 @@ try {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM student_courses WHERE student_id = :sid AND status = 'enrolled'");
         $stmt->execute(['sid' => $student['id']]);
         $enrolledCourses = (int) $stmt->fetchColumn();
+
+        // Compute GPA from numeric-style final_grade values
+        $stmt = $pdo->prepare("SELECT final_grade FROM student_grades WHERE student_id = :sid");
+        $stmt->execute(['sid' => $student['id']]);
+        $gradeRows = $stmt->fetchAll();
+        $points = [];
+        foreach ($gradeRows as $gr) {
+            $val = trim((string) ($gr['final_grade'] ?? ''));
+            if ($val === '') { continue; }
+            if (is_numeric($val)) {
+                $points[] = (float) $val;
+            }
+        }
+        if (count($points) > 0) {
+            $gpa = array_sum($points) / count($points);
+        }
     }
 } catch (PDOException $e) {
     // Keep defaults on error
@@ -80,7 +97,7 @@ require dirname(__DIR__) . '/includes/header.php';
         <section class="dashboard-grid">
             <article class="metric-card"><span class="eyebrow">Enrolled courses</span><strong><?= $enrolledCourses > 0 ? $enrolledCourses : '—' ?></strong><small><?= $enrolledCourses > 0 ? 'active courses' : 'no courses enrolled' ?></small></article>
             <article class="metric-card"><span class="eyebrow">Outstanding balance</span><strong><?= $balance > 0 ? '₱' . number_format($balance, 2) : '—' ?></strong><small><?= $balance > 0 ? 'payment required' : 'no outstanding balance' ?></small></article>
-            <article class="metric-card"><span class="eyebrow">GPA</span><strong>—</strong><small>data not available</small></article>
+            <article class="metric-card"><span class="eyebrow">GPA</span><strong><?= $gpa !== null ? number_format($gpa, 2) : '—' ?></strong><small><?= $gpa !== null ? 'average final grade' : 'data not available' ?></small></article>
         </section>
     </main>
 </div>

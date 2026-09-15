@@ -61,9 +61,8 @@ require dirname(__DIR__) . '/includes/header.php';
                                     <th>Units</th>
                                     <th>Semester</th>
                                     <th>Status</th>
-                                </th>
-                            </tr>
-                        </thead>
+                                </tr>
+                            </thead>
                         <tbody>
                             <?php foreach ($courses as $course): ?>
                                 <tr>

@@ -236,12 +236,12 @@ require dirname(__DIR__) . '/includes/header.php';
                             </div>
                         </div>
                     </div>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <p>Student record not found.</p>
-                    </div>
                 <?php endif; ?>
-                <?php endif; ?>
+            <?php else: ?>
+                <div class="empty-state">
+                    <p>Student record not found.</p>
+                </div>
+            <?php endif; ?>
             </article>
         </section>
     </main>

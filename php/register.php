@@ -201,11 +201,11 @@ $today = (new DateTime())->format('F j, Y');
                                 </div>
                                 <div class="form-field">
                                     <label for="contact_number">Contact Number *</label>
-                                    <input type="tel" id="contact_number" name="contact_number" value="<?= htmlspecialchars($old['contact_number'] ?? '-') ?>">
+                                    <input type="tel" id="contact_number" name="contact_number" value="<?= htmlspecialchars($old['contact_number'] ?? '') ?>">
                                 </div>
                                 <div class="form-field" data-show-for="BED">
                                     <label for="lrn">LRN *</label>
-                                    <input type="text" id="lrn" name="lrn" value="<?= htmlspecialchars($old['lrn'] ?? '-') ?>">
+                                    <input type="text" id="lrn" name="lrn" value="<?= htmlspecialchars($old['lrn'] ?? '') ?>">
                                 </div>
                             </div>
                         </div>
@@ -223,7 +223,7 @@ $today = (new DateTime())->format('F j, Y');
                                 </div>
                                 <div class="form-field">
                                     <label for="middle_name">Middle Name</label>
-                                    <input type="text" id="middle_name" name="middle_name" value="<?= htmlspecialchars($old['middle_name'] ?? '-') ?>">
+                                    <input type="text" id="middle_name" name="middle_name" value="<?= htmlspecialchars($old['middle_name'] ?? '') ?>">
                                 </div>
                                 <div class="form-field">
                                     <label for="date_of_birth">Date of Birth</label>
@@ -231,7 +231,7 @@ $today = (new DateTime())->format('F j, Y');
                                 </div>
                                 <div class="form-field">
                                     <label for="place_of_birth">Place of Birth</label>
-                                    <input type="text" id="place_of_birth" name="place_of_birth" value="<?= htmlspecialchars($old['place_of_birth'] ?? '-') ?>">
+                                    <input type="text" id="place_of_birth" name="place_of_birth" value="<?= htmlspecialchars($old['place_of_birth'] ?? '') ?>">
                                 </div>
                                 <div class="form-field">
                                     <label for="gender">Gender</label>
@@ -247,7 +247,7 @@ $today = (new DateTime())->format('F j, Y');
                                 </div>
                                 <div class="form-field">
                                     <label for="religion">Religion</label>
-                                    <input type="text" id="religion" name="religion" value="<?= htmlspecialchars($old['religion'] ?? '-') ?>">
+                                    <input type="text" id="religion" name="religion" value="<?= htmlspecialchars($old['religion'] ?? '') ?>">
                                 </div>
                             </div>
                         </div>
@@ -257,27 +257,27 @@ $today = (new DateTime())->format('F j, Y');
                             <div class="form-grid">
                                 <div class="form-field">
                                     <label for="street_no">St. No.</label>
-                                    <input type="text" id="street_no" name="street_no" value="<?= htmlspecialchars($old['street_no'] ?? '-') ?>">
+                                    <input type="text" id="street_no" name="street_no" value="<?= htmlspecialchars($old['street_no'] ?? '') ?>">
                                 </div>
                                 <div class="form-field">
                                     <label for="street_name">St. Name</label>
-                                    <input type="text" id="street_name" name="street_name" value="<?= htmlspecialchars($old['street_name'] ?? '-') ?>">
+                                    <input type="text" id="street_name" name="street_name" value="<?= htmlspecialchars($old['street_name'] ?? '') ?>">
                                 </div>
                                 <div class="form-field">
                                     <label for="subdivision">Subd./Village</label>
-                                    <input type="text" id="subdivision" name="subdivision" value="<?= htmlspecialchars($old['subdivision'] ?? '-') ?>">
+                                    <input type="text" id="subdivision" name="subdivision" value="<?= htmlspecialchars($old['subdivision'] ?? '') ?>">
                                 </div>
                                 <div class="form-field">
                                     <label for="province">Province</label>
-                                    <input type="text" id="province" name="province" value="<?= htmlspecialchars($old['province'] ?? '-') ?>">
+                                    <input type="text" id="province" name="province" value="<?= htmlspecialchars($old['province'] ?? '') ?>">
                                 </div>
                                 <div class="form-field">
                                     <label for="town_city">Town/City</label>
-                                    <input type="text" id="town_city" name="town_city" value="<?= htmlspecialchars($old['town_city'] ?? '-') ?>">
+                                    <input type="text" id="town_city" name="town_city" value="<?= htmlspecialchars($old['town_city'] ?? '') ?>">
                                 </div>
                                 <div class="form-field">
                                     <label for="barangay">Barangay</label>
-                                    <input type="text" id="barangay" name="barangay" value="<?= htmlspecialchars($old['barangay'] ?? '-') ?>">
+                                    <input type="text" id="barangay" name="barangay" value="<?= htmlspecialchars($old['barangay'] ?? '') ?>">
                                 </div>
                             </div>
                         </div>
@@ -285,37 +285,37 @@ $today = (new DateTime())->format('F j, Y');
                         <div class="form-section">
                             <h3>Father's Information</h3>
                             <div class="form-grid">
-                                <div class="form-field"><label for="father_name">Name</label><input type="text" id="father_name" name="father_name" value="<?= htmlspecialchars($old['father_name'] ?? '-') ?>"></div>
-                                <div class="form-field"><label for="father_occupation">Occupation</label><input type="text" id="father_occupation" name="father_occupation" value="<?= htmlspecialchars($old['father_occupation'] ?? '-') ?>"></div>
-                                <div class="form-field"><label for="father_mobile">Mobile</label><input type="tel" id="father_mobile" name="father_mobile" value="<?= htmlspecialchars($old['father_mobile'] ?? '-') ?>"></div>
+                                <div class="form-field"><label for="father_name">Name</label><input type="text" id="father_name" name="father_name" value="<?= htmlspecialchars($old['father_name'] ?? '') ?>"></div>
+                                <div class="form-field"><label for="father_occupation">Occupation</label><input type="text" id="father_occupation" name="father_occupation" value="<?= htmlspecialchars($old['father_occupation'] ?? '') ?>"></div>
+                                <div class="form-field"><label for="father_mobile">Mobile</label><input type="tel" id="father_mobile" name="father_mobile" value="<?= htmlspecialchars($old['father_mobile'] ?? '') ?>"></div>
                             </div>
                         </div>
 
                         <div class="form-section">
                             <h3>Mother's Information</h3>
                             <div class="form-grid">
-                                <div class="form-field"><label for="mother_name">Name</label><input type="text" id="mother_name" name="mother_name" value="<?= htmlspecialchars($old['mother_name'] ?? '-') ?>"></div>
-                                <div class="form-field"><label for="mother_occupation">Occupation</label><input type="text" id="mother_occupation" name="mother_occupation" value="<?= htmlspecialchars($old['mother_occupation'] ?? '-') ?>"></div>
-                                <div class="form-field"><label for="mother_mobile">Mobile</label><input type="tel" id="mother_mobile" name="mother_mobile" value="<?= htmlspecialchars($old['mother_mobile'] ?? '-') ?>"></div>
+                                <div class="form-field"><label for="mother_name">Name</label><input type="text" id="mother_name" name="mother_name" value="<?= htmlspecialchars($old['mother_name'] ?? '') ?>"></div>
+                                <div class="form-field"><label for="mother_occupation">Occupation</label><input type="text" id="mother_occupation" name="mother_occupation" value="<?= htmlspecialchars($old['mother_occupation'] ?? '') ?>"></div>
+                                <div class="form-field"><label for="mother_mobile">Mobile</label><input type="tel" id="mother_mobile" name="mother_mobile" value="<?= htmlspecialchars($old['mother_mobile'] ?? '') ?>"></div>
                             </div>
                         </div>
 
                         <div class="form-section">
                             <h3>Guardian's Information</h3>
                             <div class="form-grid">
-                                <div class="form-field"><label for="guardian_name">Name</label><input type="text" id="guardian_name" name="guardian_name" value="<?= htmlspecialchars($old['guardian_name'] ?? '-') ?>"></div>
-                                <div class="form-field"><label for="guardian_occupation">Occupation</label><input type="text" id="guardian_occupation" name="guardian_occupation" value="<?= htmlspecialchars($old['guardian_occupation'] ?? '-') ?>"></div>
-                                <div class="form-field"><label for="guardian_mobile">Mobile</label><input type="tel" id="guardian_mobile" name="guardian_mobile" value="<?= htmlspecialchars($old['guardian_mobile'] ?? '-') ?>"></div>
-                                <div class="form-field"><label for="guardian_email">Email</label><input type="email" id="guardian_email" name="guardian_email" value="<?= htmlspecialchars($old['guardian_email'] ?? '-') ?>"></div>
+                                <div class="form-field"><label for="guardian_name">Name</label><input type="text" id="guardian_name" name="guardian_name" value="<?= htmlspecialchars($old['guardian_name'] ?? '') ?>"></div>
+                                <div class="form-field"><label for="guardian_occupation">Occupation</label><input type="text" id="guardian_occupation" name="guardian_occupation" value="<?= htmlspecialchars($old['guardian_occupation'] ?? '') ?>"></div>
+                                <div class="form-field"><label for="guardian_mobile">Mobile</label><input type="tel" id="guardian_mobile" name="guardian_mobile" value="<?= htmlspecialchars($old['guardian_mobile'] ?? '') ?>"></div>
+                                <div class="form-field"><label for="guardian_email">Email</label><input type="email" id="guardian_email" name="guardian_email" value="<?= htmlspecialchars($old['guardian_email'] ?? '') ?>"></div>
                             </div>
                         </div>
 
                         <div class="form-section">
                             <h3>School Last Attended</h3>
                             <div class="form-grid">
-                                <div class="form-field"><label for="school_last_attended">School Name</label><input type="text" id="school_last_attended" name="school_last_attended" value="<?= htmlspecialchars($old['school_last_attended'] ?? '-') ?>"></div>
-                                <div class="form-field"><label for="school_address">School Address</label><input type="text" id="school_address" name="school_address" value="<?= htmlspecialchars($old['school_address'] ?? '-') ?>"></div>
-                                <div class="form-field"><label for="school_year">School Year</label><input type="text" id="school_year" name="school_year" value="<?= htmlspecialchars($old['school_year'] ?? '-') ?>"></div>
+                                <div class="form-field"><label for="school_last_attended">School Name</label><input type="text" id="school_last_attended" name="school_last_attended" value="<?= htmlspecialchars($old['school_last_attended'] ?? '') ?>"></div>
+                                <div class="form-field"><label for="school_address">School Address</label><input type="text" id="school_address" name="school_address" value="<?= htmlspecialchars($old['school_address'] ?? '') ?>"></div>
+                                <div class="form-field"><label for="school_year">School Year</label><input type="text" id="school_year" name="school_year" value="<?= htmlspecialchars($old['school_year'] ?? '') ?>"></div>
                             </div>
                         </div>
 
@@ -324,7 +324,7 @@ $today = (new DateTime())->format('F j, Y');
                             <div class="form-grid">
                                 <div class="form-field" data-show-for="BED">
                                     <label for="comorbidity">Comorbidity</label>
-                                    <input type="text" id="comorbidity" name="comorbidity" value="<?= htmlspecialchars($old['comorbidity'] ?? '-') ?>">
+                                    <input type="text" id="comorbidity" name="comorbidity" value="<?= htmlspecialchars($old['comorbidity'] ?? '') ?>">
                                 </div>
                                 <div class="form-field" data-show-for="BED">
                                     <label for="parental_consent">Parental Consent</label>
@@ -336,7 +336,7 @@ $today = (new DateTime())->format('F j, Y');
                                 </div>
                                 <div class="form-field">
                                     <label for="mode_of_transportation">Mode of Transportation</label>
-                                    <input type="text" id="mode_of_transportation" name="mode_of_transportation" value="<?= htmlspecialchars($old['mode_of_transportation'] ?? '-') ?>">
+                                    <input type="text" id="mode_of_transportation" name="mode_of_transportation" value="<?= htmlspecialchars($old['mode_of_transportation'] ?? '') ?>">
                                 </div>
                             </div>
                         </div>

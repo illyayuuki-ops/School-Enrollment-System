@@ -106,7 +106,8 @@ $cols = [];
 $vals = [];
 foreach ($defaults as $col => $def) {
     $cols[] = $col;
-    $vals[] = $old[$col] ?? $def;
+    $v = trim((string)($old[$col] ?? ''));
+    $vals[] = ($v === '') ? $def : $v;
 }
 $cols[] = 'email';
 $vals[] = $email;

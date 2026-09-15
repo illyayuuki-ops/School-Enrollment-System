@@ -12,6 +12,7 @@ $enrolledStudents = 0;
 $totalStudents = 0;
 $outstandingStudents = 0;
 $totalOutstanding = 0.00;
+$graduationCandidates = 0;
 try {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM students WHERE enrollment_status = 'enrolled'");
     $stmt->execute();
@@ -31,6 +32,11 @@ try {
     $result = $stmt->fetch(PDO::FETCH_NUM);
     $outstandingStudents = (int) ($result[0] ?? 0);
     $totalOutstanding = (float) ($result[1] ?? 0);
+
+    // Graduation candidates: enrolled students in the final year level (4th Year)
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM students WHERE enrollment_status = 'enrolled' AND year_level = '4th Year'");
+    $stmt->execute();
+    $graduationCandidates = (int) $stmt->fetchColumn();
 } catch (PDOException $e) {
     // Keep defaults on error
 }
@@ -49,7 +55,7 @@ require dirname(__DIR__) . '/includes/header.php';
         <section class="dashboard-grid">
             <article class="metric-card"><span class="eyebrow">Enrolled students</span><strong><?= number_format($enrolledStudents) ?></strong><small>Total: <?= number_format($totalStudents) ?></small></article>
             <article class="metric-card"><span class="eyebrow">Students with balance</span><strong><?= number_format($outstandingStudents) ?></strong><small>Of <?= number_format($totalStudents) ?> total</small></article>
-            <article class="metric-card"><span class="eyebrow">Graduation candidates</span><strong>—</strong><small>data not available</small></article>
+            <article class="metric-card"><span class="eyebrow">Graduation candidates</span><strong><?= number_format($graduationCandidates) ?></strong><small>Enrolled 4th Year</small></article>
             <article class="metric-card accent-card"><span class="eyebrow">Total outstanding</span><strong>₱<?= number_format($totalOutstanding, 2) ?></strong></article>
         </section>
         <section class="content-grid">

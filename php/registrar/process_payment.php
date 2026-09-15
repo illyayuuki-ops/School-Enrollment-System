@@ -19,6 +19,20 @@ if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csr
 
 $action = $_POST['action'] ?? '';
 
+// Resolve the student_number from student_id server-side so the redirect reliably
+// returns to the same student's ledger view regardless of what the form posted.
+function resolve_student_number($pdo, $studentId) {
+    if (!$studentId) { return ''; }
+    try {
+        $stmt = $pdo->prepare("SELECT student_number FROM students WHERE id = :id");
+        $stmt->execute(['id' => $studentId]);
+        $row = $stmt->fetch();
+        return $row ? (string) $row['student_number'] : '';
+    } catch (PDOException $e) {
+        return '';
+    }
+}
+
 try {
     if ($action === 'record_payment') {
         $ledgerId = (int) ($_POST['ledger_id'] ?? 0);
@@ -55,7 +69,8 @@ try {
             $stmt->execute(['actor' => $_SESSION['user']['id'], 'detail' => $detail]);
 
             $pdo->commit();
-            header('Location: /registrar/payments.php?student_id=' . urlencode($_POST['student_number'] ?? '') . '&success=Payment+recorded+successfully');
+            $studentNumber = resolve_student_number($pdo, $studentId);
+            header('Location: /registrar/payments.php?student_id=' . urlencode($studentNumber) . '&success=Payment+recorded+successfully');
             exit;
         } catch (PDOException $e) {
             $pdo->rollBack();
@@ -99,7 +114,8 @@ try {
             $stmt->execute(['actor' => $_SESSION['user']['id'], 'detail' => $detail]);
 
             $pdo->commit();
-            header('Location: /registrar/payments.php?student_id=' . urlencode($_POST['student_number'] ?? '') . '&success=Ledger+entry+created+successfully');
+            $studentNumber = resolve_student_number($pdo, $studentId);
+            header('Location: /registrar/payments.php?student_id=' . urlencode($studentNumber) . '&success=Ledger+entry+created+successfully');
             exit;
         } catch (PDOException $e) {
             $pdo->rollBack();
@@ -145,7 +161,11 @@ try {
             }
 
             $pdo->commit();
-            header('Location: /registrar/payments.php?student_id=' . urlencode($_POST['student_number'] ?? '') . '&success=Ledger+updated+successfully');
+            $stmt = $pdo->prepare("SELECT student_id FROM student_ledgers WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+            $ledgerOwner = $stmt->fetch();
+            $studentNumber = $ledgerOwner ? resolve_student_number($pdo, (int) $ledgerOwner['student_id']) : '';
+            header('Location: /registrar/payments.php?student_id=' . urlencode($studentNumber) . '&success=Ledger+updated+successfully');
             exit;
         } catch (PDOException $e) {
             $pdo->rollBack();

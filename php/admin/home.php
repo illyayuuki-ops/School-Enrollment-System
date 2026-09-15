@@ -86,7 +86,7 @@ require dirname(__DIR__) . '/includes/header.php';
                 ?>
                 <ul class="activity-list">
                     <?php if (empty($recentLogs)): ?>
-                        <li><span class="activity-dot green"></span><span><strong>No recent activity</strong></span></li>
+                        <li><span class="activity-dot green"></span><span><strong>System ready</strong><small>Admin portal initialized</small></span></li>
                     <?php else: ?>
                         <?php foreach ($recentLogs as $log): ?>
                             <li>

@@ -47,7 +47,7 @@ if ($page > $totalPages) $page = $totalPages;
 $studentsWithBalance = [];
 try {
     $stmt = $pdo->prepare("
-        SELECT s.student_number, u.full_name, s.program, s.year_level, u.email, u.student_number,
+        SELECT s.student_number, u.full_name, s.program, s.year_level, u.email,
                COALESCE(sl.balance, 0) AS outstanding_balance
         FROM students s
         JOIN users u ON s.user_id = u.id

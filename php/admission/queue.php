@@ -151,11 +151,11 @@ require dirname(__DIR__) . '/includes/header.php';
                                         </td>
                                         <td style="text-align: center;">
                                             <div class="action-buttons">
-                                                <a href="/admission/documents.php?id=<?= urlencode($app['id'] ?? '') ?>" class="btn-view">View</a>
+                                                <a href="/admission/documents.php?id=<?= urlencode((string)($app['id'] ?? '')) ?>" class="btn-view">View</a>
                                                 <?php if (($app['status'] ?? 'pending') === 'pending'): ?>
-                                                    <a href="/admission/process_application.php?id=<?= urlencode($app['id'] ?? '') ?>&action=approve" class="btn-approve" onclick="return confirm('Approve this application?');">Approve</a>
+                                                    <a href="/admission/process_application.php?id=<?= urlencode((string)($app['id'] ?? '')) ?>&action=approve" class="btn-approve" onclick="return confirm('Approve this application?');">Approve</a>
 <form method="post" action="/admission/process_application.php" style="display: inline;" onsubmit="return confirm('Reject this application?');">
-                                                    <input type="hidden" name="id" value="<?= htmlspecialchars($app['id'] ?? '') ?>">
+                                                    <input type="hidden" name="id" value="<?= htmlspecialchars((string)($app['id'] ?? '')) ?>">
                                                     <input type="hidden" name="action" value="reject">
                                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                                     <button type="submit" class="btn-reject">Reject</button>

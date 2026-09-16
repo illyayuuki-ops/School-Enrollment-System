@@ -78,30 +78,70 @@ try {
 // Adviser section check - get actual advisees
 $adviserSection = null;
 $advisees = [];
+$pendingGrades = 0;
+$completionRate = 0;
 try {
     $stmt = $pdo->prepare("
-        SELECT adviser_section FROM classes_and_schedules 
+        SELECT adviser_section FROM classes_and_schedules
         WHERE teacher_id = :tid AND adviser_section IS NOT NULL
         LIMIT 1
     ");
     $stmt->execute(['tid' => $teacherId]);
     $adviserSection = $stmt->fetchColumn();
-    
-    // If adviser, get actual advisees
+
+    // If adviser, get actual advisees. adviser_section is a VARCHAR name on
+    // classes_and_schedules; students link to sections via section_id (integer FK).
     if ($adviserSection) {
         $stmt = $pdo->prepare("
             SELECT s.student_number, u.full_name
             FROM students s
             JOIN users u ON s.user_id = u.id
-            WHERE s.year_level = (SELECT year_level FROM classes_and_schedules WHERE adviser_section = :as LIMIT 1)
-            AND s.section = :as
+            JOIN sections sec ON s.section_id = sec.id
+            WHERE sec.name = :as
             ORDER BY u.full_name
         ");
         $stmt->execute(['as' => $adviserSection]);
         $advisees = $stmt->fetchAll();
     }
+
+    // Pending grades: enrolled students in this teacher's subjects (current
+    // academic year/semester) who have no student_grades row yet.
+    $stmt = $pdo->prepare("
+        SELECT COUNT(DISTINCT sc.student_id) AS pending
+        FROM student_courses sc
+        JOIN classes_and_schedules cs ON cs.subject_code = sc.subject_code AND cs.teacher_id = :tid
+        WHERE sc.academic_year = :ay AND sc.semester = :sem
+        AND NOT EXISTS (
+            SELECT 1 FROM student_grades sg
+            WHERE sg.student_id = sc.student_id
+            AND sg.subject_code = sc.subject_code
+            AND sg.academic_year = sc.academic_year
+            AND sg.semester = sc.semester
+        )
+    ");
+    $stmt->execute(['tid' => $teacherId, 'ay' => $academicYear, 'sem' => $semester]);
+    $pendingGrades = (int) ($stmt->fetchColumn() ?? 0);
+
+    // Completion rate: graded students / total enrolled students in this teacher's subjects.
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(DISTINCT sc.student_id) AS total_enrolled,
+            COUNT(DISTINCT sg.student_id) AS graded
+        FROM student_courses sc
+        JOIN classes_and_schedules cs ON cs.subject_code = sc.subject_code AND cs.teacher_id = :tid
+        LEFT JOIN student_grades sg ON sg.student_id = sc.student_id
+            AND sg.subject_code = sc.subject_code
+            AND sg.academic_year = sc.academic_year
+            AND sg.semester = sc.semester
+        WHERE sc.academic_year = :ay AND sc.semester = :sem
+    ");
+    $stmt->execute(['tid' => $teacherId, 'ay' => $academicYear, 'sem' => $semester]);
+    $row = $stmt->fetch();
+    $totalEnrolled = (int) ($row['total_enrolled'] ?? 0);
+    $gradedCount = (int) ($row['graded'] ?? 0);
+    $completionRate = $totalEnrolled > 0 ? round(($gradedCount / $totalEnrolled) * 100, 1) : 0;
 } catch (PDOException $e) {
-    // Empty on error
+    // Keep defaults on error
 }
 
 $pageTitle = 'Faculty Overview';
@@ -118,8 +158,8 @@ require dirname(__DIR__) . '/includes/header.php';
         <section class="dashboard-grid">
             <article class="metric-card"><span class="eyebrow">Active classes</span><strong><?= $activeClasses ?></strong></article>
             <article class="metric-card"><span class="eyebrow">Total students</span><strong><?= $totalStudents ?></strong></article>
-            <article class="metric-card"><span class="eyebrow">Pending grades</span><strong><?= $pendingGrades ?? '—' ?></strong></article>
-            <article class="metric-card accent-card"><span class="eyebrow">Completion rate</span><strong><?= $completionRate ?? '—' ?></strong></article>
+            <article class="metric-card"><span class="eyebrow">Pending grades</span><strong><?= $pendingGrades ?></strong></article>
+            <article class="metric-card accent-card"><span class="eyebrow">Completion rate</span><strong><?= $completionRate ?>%</strong></article>
         </section>
         <section class="content-grid">
             <article class="panel panel-wide">

@@ -130,7 +130,16 @@ require dirname(__DIR__) . '/includes/header.php';
                                 <?php foreach ($applications as $app): ?>
                                     <tr>
                                         <td><strong><?= htmlspecialchars($app['application_number'] ?? '—') ?></strong></td>
-                                        <td><?= htmlspecialchars($app['full_name'] ?? (($app['last_name'] ?? '') . ' ' . ($app['first_name'] ?? '') ?: '—')) ?></td>
+                                        <?php
+                                $name = trim((string) ($app['full_name'] ?? ''));
+                                if ($name === '') {
+                                    $name = trim(($app['last_name'] ?? '') . ' ' . ($app['first_name'] ?? ''));
+                                }
+                                if ($name === '') {
+                                    $name = '—';
+                                }
+                                ?>
+                                    <td><?= htmlspecialchars($name) ?></td>
                                         <td><?= htmlspecialchars($app['level_type'] ?? '—') ?></td>
                                         <td><?= htmlspecialchars($app['first_choice_course'] ?? '—') ?></td>
                                         <td><?= htmlspecialchars($app['email'] ?? '—') ?></td>

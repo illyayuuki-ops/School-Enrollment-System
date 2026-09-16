@@ -66,18 +66,6 @@ try {
 // Fetch attendance records
 $attendanceRecords = [];
 try {
-    $where = "WHERE ta.teacher_id = :tid AND ta.work_date >= :start_date AND ta.work_date <= :end_date";
-    $params = [
-        'tid' => $teacherId,
-        'start_date' => $monthStart,
-        'end_date' => $monthEnd,
-    ];
-    
-    if ($subjectFilter) {
-        // We could join with classes to filter by subject, but teacher_attendance doesn't have subject directly
-        // For now, we'll just filter by teacher and date
-    }
-    
     $stmt = $pdo->prepare("
         SELECT ta.work_date, ta.status, ta.remarks, ta.created_at
         FROM teacher_attendance ta

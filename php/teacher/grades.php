@@ -103,7 +103,7 @@ if ($selectedSubject && !$error) {
     try {
         // Get students enrolled in this subject for the current academic year/semester
         $stmt = $pdo->prepare("
-            SELECT sc.student_id, s.student_number, u.full_name, sc.grade, sc.remark
+            SELECT sc.student_id, s.student_number, u.full_name
             FROM student_courses sc
             JOIN students s ON sc.student_id = s.id
             JOIN users u ON s.user_id = u.id

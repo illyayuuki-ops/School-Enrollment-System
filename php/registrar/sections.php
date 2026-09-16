@@ -207,7 +207,7 @@ require dirname(__DIR__) . '/includes/header.php';
                                         // Get students in this section
                                         $sectionStudents = [];
                                         try {
-                                            $stmt = $pdo->prepare("SELECT s.student_number, u.full_name, s.program, s.year_level FROM students s JOIN users u ON s.user_id = u.id WHERE s.section_id = :sid ORDER BY u.full_name");
+                                            $stmt = $pdo->prepare("SELECT s.id, s.student_number, u.full_name, s.program, s.year_level FROM students s JOIN users u ON s.user_id = u.id WHERE s.section_id = :sid ORDER BY u.full_name");
                                             $stmt->execute(['sid' => $section['id']]);
                                             $sectionStudents = $stmt->fetchAll();
                                         } catch (PDOException $e) {}

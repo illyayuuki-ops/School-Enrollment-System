@@ -17,6 +17,7 @@ $offset = ($page - 1) * $perPage;
 $studentsWithBalance = [];
 $totalStudents = 0;
 $totalOutstanding = 0.00;
+$totalAssessed = 0.00;
 try {
     $where = '';
     $params = [];
@@ -66,6 +67,10 @@ try {
     // Total outstanding across all students
     $stmt = $pdo->query("SELECT COALESCE(SUM(amount_due - amount_paid), 0) FROM student_ledgers");
     $totalOutstanding = (float) $stmt->fetchColumn();
+
+    // Total assessed across all students (sum of amount_due, not just the selected student)
+    $stmt = $pdo->query("SELECT COALESCE(SUM(amount_due), 0) FROM student_ledgers");
+    $totalAssessed = (float) $stmt->fetchColumn();
 
     // Count students with outstanding balance
     $stmt = $pdo->query("SELECT COUNT(DISTINCT student_id) FROM student_ledgers WHERE amount_due > amount_paid");
@@ -129,7 +134,7 @@ require dirname(__DIR__) . '/includes/header.php';
                 <div class="balance-cards">
                     <div class="balance-card">
                         <div class="card-label">Total Assessed</div>
-                        <div class="card-value">₱<?= number_format($totalOutstanding + array_sum(array_column($ledger, 'amount_paid')), 2) ?></div>
+                        <div class="card-value">₱<?= number_format($totalAssessed, 2) ?></div>
                         <div class="card-sub">Total amount due across all students</div>
                     </div>
                     <div class="balance-card">
@@ -425,7 +430,9 @@ require dirname(__DIR__) . '/includes/header.php';
                                 const dueCell = row.querySelector('td.amount-due');
                                 const paidCell = row.querySelector('td.amount-paid');
                                 if (dueCell) document.getElementById('rp_amount_due').value = dueCell.textContent.replace('₱', '').replace(/,/g, '');
-                                if (paidCell) document.getElementById('rp_amount_paid').value = paidCell.textContent.replace('₱', '').replace(/,/g, '');
+                                // rp_amount_paid is not present in the Record Payment modal; guard against its absence.
+                                const paidEl = document.getElementById('rp_amount_paid');
+                                if (paidEl && paidCell) paidEl.value = paidCell.textContent.replace('₱', '').replace(/,/g, '');
                             }
                             document.getElementById('recordPaymentModal').style.display = 'flex';
                             document.getElementById('rp_amount').focus();
